@@ -1,5 +1,6 @@
 {
   'variables': {
+    'win_third_party_warn_as_error': 'false',
     'pdf_use_skia%': 0,
   },
   'target_defaults': {
@@ -8,6 +9,9 @@
       '_FXFT_VERSION_=2501',
       '_FPDFSDK_LIB',
       '_NO_GDIPLUS_',  # workaround text rendering issues on Windows
+    ],
+    'cflags': [
+       '-fexceptions',
     ],
     'conditions': [
       ['pdf_use_skia==1', {
@@ -36,7 +40,13 @@
       ['OS=="mac"', {
         'xcode_settings': {
           'GCC_ENABLE_CPP_EXCEPTIONS': 'YES',
+          'GCC_TREAT_WARNINGS_AS_ERRORS': 'NO',    # -Werror
         },
+      }],
+      ['clang==1', {
+         'cflags!': [
+           '-Werror',
+         ],
       }],
     ],
     'msvs_disabled_warnings': [
@@ -45,10 +55,9 @@
   },
   'targets': [
     {
-      'target_name': 'pdfium',
+      'target_name': 'fpdfsdk',
       'type': 'static_library',
       'dependencies': [
-        'safemath',
         'fpdfdoc',
         'fpdfapi',
         'fpdftext',
@@ -107,40 +116,6 @@
             'fpdfsdk/src/fpdfsdkdll.rc',
           ],
         }],
-      ],
-      'all_dependent_settings': {
-        'msvs_settings': {
-          'VCLinkerTool': {
-            'AdditionalDependencies': [
-              'advapi32.lib',
-              'gdi32.lib',
-              'user32.lib',
-            ],
-          },
-        },
-        'conditions': [
-          ['OS=="mac"', {
-            'link_settings': {
-              'libraries': [
-                '$(SDKROOT)/System/Library/Frameworks/AppKit.framework',
-                '$(SDKROOT)/System/Library/Frameworks/CoreFoundation.framework',
-              ],
-            },
-          }],
-        ],
-      },
-    },
-    {
-      'target_name': 'safemath',
-      'type': 'none',
-      'sources': [
-        'third_party/logging.h',
-        'third_party/macros.h',
-        'third_party/template_util.h',
-        'third_party/numerics/safe_conversions.h',
-        'third_party/numerics/safe_conversions_impl.h',
-        'third_party/numerics/safe_math.h',
-        'third_party/numerics/safe_math_impl.h',
       ],
     },
     {
@@ -477,13 +452,6 @@
         'core/src/fxcodec/libjpeg/makefile',
         'core/src/fxcodec/libjpeg/transupp.h',
       ],
-      'conditions': [
-        ['os_posix==1', {
-          # core/src/fxcodec/fx_libopenjpeg/src/fx_mct.c does an pointer-to-int
-          # conversion to check that an address is 16-bit aligned (benign).
-          'cflags_c': [ '-Wno-pointer-to-int-cast' ],
-        }],
-      ],
     },
     {
       'target_name': 'fxcrt',
@@ -517,6 +485,7 @@
         'core/src/fxcrt/fx_basic_list.cpp',
         'core/src/fxcrt/fx_basic_maps.cpp',
         'core/src/fxcrt/fx_basic_memmgr.cpp',
+        'core/src/fxcrt/fx_basic_memmgr_mini.cpp',
         'core/src/fxcrt/fx_basic_plex.cpp',
         'core/src/fxcrt/fx_basic_utf.cpp',
         'core/src/fxcrt/fx_basic_util.cpp',
@@ -526,6 +495,7 @@
         'core/src/fxcrt/fx_unicode.cpp',
         'core/src/fxcrt/fx_xml_composer.cpp',
         'core/src/fxcrt/fx_xml_parser.cpp',
+        'core/src/fxcrt/mem_int.h',
         'core/src/fxcrt/plex.h',
         'core/src/fxcrt/xml_int.h',
       ],
@@ -668,6 +638,28 @@
             'core/src/fxge/win32/win32_int.h',
           ],
         }],
+      ],
+    },
+    {
+      'target_name': 'native',
+      'type': 'shared_library',
+      'ldflags': [ '-L<(PRODUCT_DIR)', '-L$(SYSROOT)/usr/lib', '-llog', '-ljnigraphics',],
+      'dependencies': [
+        'fpdfsdk',
+      ],
+      'sources': [
+        '../fpdfsdk/include/fpdfview.h',
+        'native/native.h',
+        'native/native.cpp',
+        'native/native_cpp.c',
+        'native/handle.h',
+        'native/handle.cpp',
+        'native/pdfreader.h',
+        'native/pdfreader.cpp',
+        'native/com_kirrupt_pdfiumandroid_PDFReader.h',
+        'native/pdfdocument.h',
+        'native/pdfdocument.cpp',
+        'native/com_kirrupt_pdfiumandroid_PDFDocument.h',
       ],
     },
   ],
