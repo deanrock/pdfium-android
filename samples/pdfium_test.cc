@@ -13,10 +13,8 @@
 
 #include "../fpdfsdk/include/fpdf_dataavail.h"
 #include "../fpdfsdk/include/fpdf_ext.h"
-#include "../fpdfsdk/include/fpdfformfill.h"
 #include "../fpdfsdk/include/fpdftext.h"
 #include "../fpdfsdk/include/fpdfview.h"
-#include "v8/include/v8.h"
 
 #ifdef _WIN32
   #define snprintf _snprintf
@@ -134,11 +132,6 @@ void WriteEmf(FPDF_PAGE page, const char* pdf_name, int num) {
 }
 #endif
 
-int Form_Alert(IPDF_JSPLATFORM*, FPDF_WIDESTRING, FPDF_WIDESTRING, int, int) {
-  printf("Form_Alert called.\n");
-  return 0;
-}
-
 void Unsupported_Handler(UNSUPPORT_INFO*, int type) {
   std::string feature = "Unknown";
   switch (type) {
@@ -241,16 +234,6 @@ void RenderPdf(const char* name, const char* pBuf, size_t len,
                OutputFormat format) {
   printf("Rendering PDF file %s.\n", name);
 
-  IPDF_JSPLATFORM platform_callbacks;
-  memset(&platform_callbacks, '\0', sizeof(platform_callbacks));
-  platform_callbacks.version = 1;
-  platform_callbacks.app_alert = Form_Alert;
-
-  FPDF_FORMFILLINFO form_callbacks;
-  memset(&form_callbacks, '\0', sizeof(form_callbacks));
-  form_callbacks.version = 1;
-  form_callbacks.m_pJsPlatform = &platform_callbacks;
-
   TestLoader loader(pBuf, len);
 
   FPDF_FILEACCESS file_access;
@@ -283,11 +266,6 @@ void RenderPdf(const char* name, const char* pBuf, size_t len,
   }
 
   (void) FPDF_GetDocPermissions(doc);
-  (void) FPDFAvail_IsFormAvail(pdf_avail, &hints);
-
-  FPDF_FORMHANDLE form = FPDFDOC_InitFormFillEnviroument(doc, &form_callbacks);
-  FPDF_SetFormFieldHighlightColor(form, 0, 0xFFE4DD);
-  FPDF_SetFormFieldHighlightAlpha(form, 100);
 
   int first_page = FPDFAvail_GetFirstPageNum(doc);
   (void) FPDFAvail_IsPageAvail(pdf_avail, first_page, &hints);
@@ -297,14 +275,10 @@ void RenderPdf(const char* name, const char* pBuf, size_t len,
     (void) FPDFAvail_IsPageAvail(pdf_avail, i, &hints);
   }
 
-  FORM_DoDocumentJSAction(form);
-  FORM_DoDocumentOpenAction(form);
-
   for (int i = 0; i < page_count; ++i) {
     FPDF_PAGE page = FPDF_LoadPage(doc, i);
     FPDF_TEXTPAGE text_page = FPDFText_LoadPage(page);
-    FORM_OnAfterLoadPage(page, form);
-    FORM_DoPageAAction(page, form, FPDFPAGE_AACTION_OPEN);
+
 
     int width = static_cast<int>(FPDF_GetPageWidth(page));
     int height = static_cast<int>(FPDF_GetPageHeight(page));
@@ -312,7 +286,6 @@ void RenderPdf(const char* name, const char* pBuf, size_t len,
     FPDFBitmap_FillRect(bitmap, 0, 0, width, height, 0xFFFFFFFF);
 
     FPDF_RenderPageBitmap(bitmap, page, 0, 0, width, height, 0, 0);
-    FPDF_FFLDraw(form, bitmap, page, 0, 0, width, height, 0, 0);
     int stride = FPDFBitmap_GetStride(bitmap);
     const char* buffer =
         reinterpret_cast<const char*>(FPDFBitmap_GetBuffer(bitmap));
@@ -336,14 +309,10 @@ void RenderPdf(const char* name, const char* pBuf, size_t len,
 
     FPDFBitmap_Destroy(bitmap);
 
-    FORM_DoPageAAction(page, form, FPDFPAGE_AACTION_CLOSE);
-    FORM_OnBeforeClosePage(page, form);
     FPDFText_ClosePage(text_page);
     FPDF_ClosePage(page);
   }
 
-  FORM_DoDocumentAAction(form, FPDFDOC_AACTION_WC);
-  FPDFDOC_ExitFormFillEnviroument(form);
   FPDF_CloseDocument(doc);
   FPDFAvail_Destroy(pdf_avail);
 
@@ -351,7 +320,7 @@ void RenderPdf(const char* name, const char* pBuf, size_t len,
 }
 
 int main(int argc, const char* argv[]) {
-  v8::V8::InitializeICU();
+  //v8::V8::InitializeICU();
   OutputFormat format = OUTPUT_NONE;
   std::list<const char*> files;
   if (!ParseCommandLine(argc, argv, &format, &files)) {
