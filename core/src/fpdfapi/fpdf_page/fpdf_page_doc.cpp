@@ -567,7 +567,7 @@ CPDF_IccProfile* CPDF_DocPageData::GetIccProfile(CPDF_Stream* pIccProfileStream,
     stream.LoadAllData(pIccProfileStream, FALSE);
     FX_BYTE digest[20];
     CPDF_Stream* pCopiedStream = NULL;
-    CRYPT_SHA1Generate(stream.GetData(), stream.GetSize(), digest);
+    //CRYPT_SHA1Generate(stream.GetData(), stream.GetSize(), digest);
     if (m_HashProfileMap.Lookup(CFX_ByteStringC(digest, 20), (void*&)pCopiedStream)) {
         m_IccProfileMap.Lookup(pCopiedStream, ipData);
         ipData->m_nCount++;
