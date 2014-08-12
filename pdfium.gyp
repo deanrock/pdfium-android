@@ -58,6 +58,7 @@
       'target_name': 'fpdfsdk',
       'type': 'static_library',
       'dependencies': [
+        'safemath',
         'fpdfdoc',
         'fpdfapi',
         'fpdftext',
@@ -145,6 +146,19 @@
         'core/src/fpdfdoc/doc_vtmodule.cpp',
         'core/src/fpdfdoc/pdf_vt.h',
         'core/src/fpdfdoc/tagged_int.h',
+      ],
+    },
+    {
+      'target_name': 'safemath',
+      'type': 'none',
+      'sources': [
+        'third_party/logging.h',
+        'third_party/macros.h',
+        'third_party/template_util.h',
+        'third_party/numerics/safe_conversions.h',
+        'third_party/numerics/safe_conversions_impl.h',
+        'third_party/numerics/safe_math.h',
+        'third_party/numerics/safe_math_impl.h',
       ],
     },
     {
@@ -485,7 +499,6 @@
         'core/src/fxcrt/fx_basic_list.cpp',
         'core/src/fxcrt/fx_basic_maps.cpp',
         'core/src/fxcrt/fx_basic_memmgr.cpp',
-        'core/src/fxcrt/fx_basic_memmgr_mini.cpp',
         'core/src/fxcrt/fx_basic_plex.cpp',
         'core/src/fxcrt/fx_basic_utf.cpp',
         'core/src/fxcrt/fx_basic_util.cpp',
