@@ -97,11 +97,19 @@ JNIEXPORT jint JNICALL Java_com_kirrupt_pdfiumandroid_PDFDocument_getRectangleBi
 
 /*
  * Class:     com_kirrupt_pdfiumandroid_PDFDocument
- * Method:    renderRectangle
+ * Method:    renderRectangleWithScale
  * Signature: (IIFIILandroid/graphics/Bitmap;)Z
  */
-JNIEXPORT jboolean JNICALL Java_com_kirrupt_pdfiumandroid_PDFDocument_renderRectangle
+JNIEXPORT jboolean JNICALL Java_com_kirrupt_pdfiumandroid_PDFDocument_renderRectangleWithScale
   (JNIEnv *, jobject, jint, jint, jfloat, jint, jint, jobject);
+
+/*
+ * Class:     com_kirrupt_pdfiumandroid_PDFDocument
+ * Method:    renderRectangle
+ * Signature: (IIIIIILandroid/graphics/Bitmap;)Z
+ */
+JNIEXPORT jboolean JNICALL Java_com_kirrupt_pdfiumandroid_PDFDocument_renderRectangle
+  (JNIEnv *, jobject, jint, jint, jint, jint, jint, jint, jobject);
 
 /*
  * Class:     com_kirrupt_pdfiumandroid_PDFDocument

@@ -1,9 +1,5 @@
 package com.kirrupt.pdfiumandroid;
 
-import java.nio.ByteBuffer;
-
-import android.graphics.Bitmap;
-
 public class PDFReader {
 	private long nativeHandle;
 	

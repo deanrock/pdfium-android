@@ -1,8 +1,5 @@
 package com.kirrupt.pdfiumandroid;
 
-import com.kirrupt.pdfiumandroid.MyView1.RenderFullPage;
-import com.kirrupt.pdfiumandroid.MyView1.RenderPage;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
@@ -16,7 +13,6 @@ import android.util.Log;
 import android.widget.ImageView;
 import android.view.Display;
 import android.view.MotionEvent;
-import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.View.OnTouchListener;
@@ -83,7 +79,7 @@ public class MyView2 extends ImageView implements OnTouchListener {
 					Config.ARGB_8888);
 
 			//render bitmap
-			document.renderRectangle((int)displayWidth, (int)displayHeight, scale*1.0f, (int)(scale*200), (int)(scale*200), bitmap);
+			document.renderRectangleWithScale((int)displayWidth, (int)displayHeight, scale*1.0f, (int)(scale*200), (int)(scale*200), bitmap);
 
 			long renderTime = System.currentTimeMillis() - startTime;
 			Log.d("TIME", "render=" + String.valueOf(renderTime));
@@ -126,16 +122,16 @@ public class MyView2 extends ImageView implements OnTouchListener {
 			Log.i("Render","RenderFullPage");
 			float scaleFactor = 1;
 			
-			int fullPageWidth = (int) (document.width() * (int)scaleFactor);
+			int fullPageWidth = document.width() * (int)scaleFactor;
 			float ratio = (float)document.width() / (float)document.width() * (int)scaleFactor;
 			
-			int fullPageHeight = (int)(ratio * (float)document.height());
+			int fullPageHeight = (int)(ratio * document.height());
 			
 			Log.i(MyView1.class.getSimpleName()," render: "+fullPageWidth+" "+fullPageHeight+", ratio: "+ratio);
 			
 			Bitmap bitmap = Bitmap.createBitmap(fullPageWidth, fullPageHeight, Config.ARGB_8888);
 			
-			document.renderRectangle(fullPageWidth, fullPageHeight, ratio, 0,0, bitmap);
+			document.renderRectangleWithScale(fullPageWidth, fullPageHeight, ratio, 0,0, bitmap);
 			
 			long renderTime = System.currentTimeMillis() - startTime;
 			

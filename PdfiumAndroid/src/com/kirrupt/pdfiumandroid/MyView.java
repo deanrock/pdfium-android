@@ -2,7 +2,6 @@ package com.kirrupt.pdfiumandroid;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Bitmap.Config;
 import android.os.AsyncTask;
@@ -43,7 +42,7 @@ public class MyView extends View {
 					Config.ARGB_8888);
 			
 			//render bitmap
-			document.renderRectangle((int)displayWidth, (int)displayHeight, scale*1.0f, (int)(scale*1), (int)(scale*1), bitmap);
+			document.renderRectangleWithScale((int)displayWidth, (int)displayHeight, scale*1.0f, (int)(scale*1), (int)(scale*1), bitmap);
 
 			long renderTime = System.currentTimeMillis() - startTime;
 			Log.d("TIME", "render=" + String.valueOf(renderTime));

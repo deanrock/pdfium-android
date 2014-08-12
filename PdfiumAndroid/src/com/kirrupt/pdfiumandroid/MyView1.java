@@ -81,11 +81,11 @@ public class MyView1 extends SurfaceView {
 			displayHeight = document.height();
 			//create bitmap with the required size
 			Log.i(MyView.class.getSimpleName()," display: "+displayWidth+" "+displayHeight);
-			Bitmap bitmap = Bitmap.createBitmap((int)displayWidth, (int)displayHeight,
+			Bitmap bitmap = Bitmap.createBitmap(displayWidth, displayHeight,
 					Config.ARGB_8888);
 			
 			//render bitmap, izraèunati scale na pravilno velikost glede screena.
-			document.renderRectangle((int)displayWidth, (int)displayHeight, 1.0f, 0,0, bitmap);
+			document.renderRectangleWithScale(displayWidth, displayHeight, 1.0f, 0,0, bitmap);
 			
 			long renderTime = System.currentTimeMillis() - startTime;
 			Log.d("TIME", "render=" + String.valueOf(renderTime));
@@ -142,14 +142,14 @@ public class MyView1 extends SurfaceView {
 			fullPageWidth = deviceDisplayWidth * (int)scaleFactor;
 			float ratio = (float)document.width() / (float)deviceDisplayWidth * (int)scaleFactor;
 			
-			fullPageHeight = (int)(ratio * (float)document.height());
+			fullPageHeight = (int)(ratio * document.height());
 			
 			Log.i(MyView1.class.getSimpleName()," render: "+fullPageWidth+" "+fullPageHeight+", ratio: "+ratio);
 			
 			Bitmap bitmap = Bitmap.createBitmap(fullPageWidth, fullPageHeight, Config.ARGB_8888);
 			
 			//document.renderRectangle(fullPageWidth, fullPageHeight, ratio, 0,0, bitmap);
-			document.renderRectangle(fullPageWidth, fullPageHeight, 1.0f,100,100, bitmap);
+			document.renderRectangleWithScale(fullPageWidth, fullPageHeight, 1.0f,100,100, bitmap);
 			
 			long renderTime = System.currentTimeMillis() - startTime;
 			
@@ -187,7 +187,7 @@ public class MyView1 extends SurfaceView {
 			this.renderingInProgress = true;
 			Log.d("R", "in progress");
 
-			int width = (int) ((this.getWidth() > 0) ? this.getWidth() : displayWidth);		
+			int width = (this.getWidth() > 0) ? this.getWidth() : displayWidth;		
 			
 			r.execute(width, this.getHeight());
 		}
@@ -327,7 +327,7 @@ public class MyView1 extends SurfaceView {
 		
 		Log.i("Move","move: "+mPosX+" "+mPosY);
 		canvas.translate(mPosX, mPosY);
-		canvas.drawBitmap(this.bitmap, getMatrix(), null);
+		//canvas.drawBitmap(this.bitmap, getMatrix(), null);
 		canvas.restore();  
 	}
 
