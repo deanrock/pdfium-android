@@ -64,7 +64,7 @@ void PDFDocument::closeDocument() {
 bool PDFDocument::RenderPage(int start_x, int start_y, int size_x, int size_y) {
     this->bitmap = (CFX_DIBitmap *)FPDFBitmap_CreateEx(size_x, size_y, FPDFBitmap_BGRA, NULL, 0);
     
-    FPDFBitmap_FillRect(this->bitmap, 0, 0, size_x, size_y, 255, 255, 255, 255);
+    FPDFBitmap_FillRect(this->bitmap, 0, 0, size_x, size_y, 0xFFFFFFFF);
     
     FPDF_RenderPageBitmap(this->bitmap, this->page, start_x, start_y, size_x, size_y, 0, 0);
     
@@ -239,7 +239,7 @@ bool PDFDocument::renderRectangle(int width, int height, int renderWidth, int re
     LogElapsed(start_tv, "CreateEx");
 
     struct timeval tv2 = getTime();
-    FPDFBitmap_FillRect(renderedBitmap, 0, 0, width, height, 255, 255, 255, 255);
+    FPDFBitmap_FillRect(renderedBitmap, 0, 0, width, height, 0xFFFFFFFF);
     LogElapsed(tv2, "FillRect");
 
     struct timeval tv3 = getTime();
