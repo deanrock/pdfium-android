@@ -892,6 +892,8 @@ static CFX_DIBitmap* DrawPatternBitmap(CPDF_Document* pDoc, CPDF_PageRenderCache
                                        CPDF_TilingPattern* pPattern, const CFX_AffineMatrix* pObject2Device,
                                        int width, int height, int flags)
 {
+    printf("[render/pattern] DrawPatternBitmap called\n");
+
     CFX_DIBitmap* pBitmap = FX_NEW CFX_DIBitmap;
     if (!pBitmap->Create(width, height, pPattern->m_bColored ? FXDIB_Argb : FXDIB_8bppMask)) {
         delete pBitmap;

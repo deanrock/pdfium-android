@@ -279,6 +279,9 @@ void RenderPdf(const char* name, const char* pBuf, size_t len,
     FPDF_PAGE page = FPDF_LoadPage(doc, i);
     FPDF_TEXTPAGE text_page = FPDFText_LoadPage(page);
 
+      int chars = FPDFText_CountChars(text_page);
+      
+      printf("chars %d\n", chars);
 
     int width = static_cast<int>(FPDF_GetPageWidth(page));
     int height = static_cast<int>(FPDF_GetPageHeight(page));
@@ -323,7 +326,7 @@ int main(int argc, const char* argv[]) {
   //v8::V8::InitializeICU();
   OutputFormat format = OUTPUT_NONE;
   std::list<const char*> files;
-  if (!ParseCommandLine(argc, argv, &format, &files)) {
+ /* if (!ParseCommandLine(argc, argv, &format, &files)) {
     printf("Usage: pdfium_test [OPTIONS] [FILE]\n");
     printf("--ppm    write page images <pdf-name>.<page-number>.ppm\n");
 #ifdef _WIN32
@@ -331,9 +334,16 @@ int main(int argc, const char* argv[]) {
     printf("--emf    write page meta files <pdf-name>.<page-number>.emf\n");
 #endif
     return 1;
-  }
+  }*/
+    
+    format=OUTPUT_PPM;
+    
+    //files.push_back("/Users/dean/Desktop/test.ppm");
+    files.push_back("/Users/dean/Desktop/test.pdf");
+    
 
   FPDF_InitLibrary(NULL);
+  printf("test");
 
   UNSUPPORT_INFO unsuppored_info;
   memset(&unsuppored_info, '\0', sizeof(unsuppored_info));

@@ -187,6 +187,8 @@ void _CPDF_UniqueKeyGen::Generate(int count, ...)
 }
 FX_BOOL CPDF_RenderStatus::ProcessText(const CPDF_TextObject* textobj, const CFX_AffineMatrix* pObj2Device, CFX_PathData* pClippingPath)
 {
+    //printf("[render/text] ProcessText called [n: %d]\n", textobj->m_nChars);
+    return TRUE;
     if(textobj->m_nChars == 0) {
         return TRUE;
     }
@@ -297,6 +299,7 @@ FX_BOOL CPDF_RenderStatus::ProcessText(const CPDF_TextObject* textobj, const CFX
                                                &text_matrix, pDeviceMatrix, textobj->m_GraphState, fill_argb, stroke_argb, pClippingPath, flag);
     }
     text_matrix.Concat(*pObj2Device);
+    
     return CPDF_TextRenderer::DrawNormalText(m_pDevice, textobj->m_nChars, textobj->m_pCharCodes, textobj->m_pCharPos, pFont, font_size,
             &text_matrix, fill_argb, &m_Options);
 }

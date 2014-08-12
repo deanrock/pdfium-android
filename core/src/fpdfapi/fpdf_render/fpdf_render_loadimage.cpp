@@ -1495,6 +1495,7 @@ FX_BOOL CPDF_ProgressiveImageLoaderHandle::Continue(IFX_Pause* pPause)
 }
 FX_BOOL CPDF_ImageLoader::Load(const CPDF_ImageObject* pImage, CPDF_PageRenderCache* pCache, FX_BOOL bStdCS, FX_DWORD GroupFamily, FX_BOOL bLoadMask, CPDF_RenderStatus* pRenderStatus)
 {
+    printf("[render/loadimage] Load called\n");
     if (pImage == NULL) {
         return FALSE;
     }

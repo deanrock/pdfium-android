@@ -13,6 +13,7 @@
 #include "render_int.h"
 FX_BOOL CPDF_RenderStatus::ProcessImage(CPDF_ImageObject* pImageObj, const CFX_AffineMatrix* pObj2Device)
 {
+    printf("[render/image] ProcessImage called\n");
     CPDF_ImageRenderer render;
     if (render.Start(this, pImageObj, pObj2Device, m_bStdCS, m_curBlend)) {
         render.Continue(NULL);

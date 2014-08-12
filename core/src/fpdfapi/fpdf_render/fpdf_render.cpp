@@ -528,6 +528,7 @@ FX_BOOL IsAvailableMatrix(const CFX_AffineMatrix& matrix)
 }
 FX_BOOL CPDF_RenderStatus::ProcessPath(CPDF_PathObject* pPathObj, const CFX_AffineMatrix* pObj2Device)
 {
+    return false;
     int FillType = pPathObj->m_FillType;
     FX_BOOL bStroke = pPathObj->m_bStroke;
     ProcessPathPattern(pPathObj, pObj2Device, FillType, bStroke);
