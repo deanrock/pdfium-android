@@ -16,3 +16,12 @@ Makefile
 *.user
 *.vcxproj
 *.xcodeproj
+*.class
+PdfiumAndroid/obj/*
+PdfiumAndroid/libs/armeabi/
+PdfiumAndroid/libs/x86/
+PdfiumAndroid/libs/armeabi-v7a/
+PdfiumAndroid/bin/
+
+PdfiumAndroid/gen/
+
