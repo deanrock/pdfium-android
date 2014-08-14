@@ -114,9 +114,9 @@ public class ReaderView
 	}
 
 	public void moveToPrevious() {
-		View v = mChildViews.get(mCurrent-1);
-		if (v != null)
-			slideViewOntoScreen(v);
+		//View v = mChildViews.get(mCurrent-1);
+		//if (v != null)
+		//	slideViewOntoScreen(v);
 	}
 
 	// When advancing down the page, we want to advance by about
