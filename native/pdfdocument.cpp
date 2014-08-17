@@ -250,7 +250,7 @@ bool PDFDocument::renderRectangle(int width, int height, int renderWidth, int re
 
     struct timeval tv4 = getTime();
 
-    int pos = 0;
+    /*int pos = 0;
     for (int i = 0;i<height;i++) {
         for (int j = 0;j<width;j++) {
             unsigned int pixel = renderedBitmap->GetPixel(j, i);
@@ -265,6 +265,34 @@ bool PDFDocument::renderRectangle(int width, int height, int renderWidth, int re
 
             bitmap[pos++] = 0xFF;//alpha channel
         }
+    }*/
+
+    //test
+    //int stride = FPDFBitmap_GetStride(renderedBitmap);
+    char* pdfBuffer = reinterpret_cast<char*>(FPDFBitmap_GetBuffer(renderedBitmap));
+
+    /*for (int h = 0; h < height; ++h) {
+        const char* src_line = pdfBuffer + (stride * h);
+        unsigned char* dest_line = bitmap + (width * h * 4);
+        for (int w = 0; w < width; ++w) {
+            int x = w * 4;
+            // R
+            //dest_line[w*3] = 0xCC;
+            dest_line[x] = src_line[x + 2];
+            // G
+            dest_line[x + 1] = src_line[x + 1];
+            // B
+            dest_line[x + 2] = src_line[x];
+
+            dest_line[x + 3] = 0xFF;//alpha
+        }
+    }*/
+
+    for (int x = 0; x < size; x+=4) {
+        bitmap[x] = pdfBuffer[x+2];
+        bitmap[x+1] = pdfBuffer[x+1];
+        bitmap[x+2] = pdfBuffer[x];
+        bitmap[x+3] = pdfBuffer[x+3];
     }
 
     LogElapsed(tv4, "convert bitmap");
