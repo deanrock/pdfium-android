@@ -207,9 +207,9 @@ bool PDFDocument::renderRectangle(int width, int height, int renderWidth, int re
     int endX = start_x + width;
     int endY = start_y + height;
 
-    LOGI("bitmap size: %d * %d * 4 = %d", width, height, width*height*4);
-    LOGI("renderBitmap size: %d x %d", renderWidth, renderHeight);
-    LOGI("start_x=%d, start_y=%d, end_x=%d, end_y=%d",start_x, start_y, endX, endY);
+    //LOGI("bitmap size: %d * %d * 4 = %d", width, height, width*height*4);
+    //LOGI("renderBitmap size: %d x %d", renderWidth, renderHeight);
+    //LOGI("start_x=%d, start_y=%d, end_x=%d, end_y=%d",start_x, start_y, endX, endY);
 
     if (endX > renderWidth) {
         LOGE("end_x %d too big", endX);
@@ -267,7 +267,7 @@ bool PDFDocument::renderRectangle(int width, int height, int renderWidth, int re
         }
     }
 
-    LogElapsed(tv4, "covert bitmap");
+    LogElapsed(tv4, "convert bitmap");
 
     FPDFBitmap_Destroy(renderedBitmap);
     renderedBitmap = NULL;
@@ -503,7 +503,7 @@ JNIEXPORT jboolean JNICALL Java_com_kirrupt_pdfiumandroid_PDFDocument_renderRect
         LOGE("AndroidBitmap_getInfo() failed ! error=%d", ret);
         return false;
     }
-    LOGI("width:%d height:%d stride:%d", bitmapInfo.width, bitmapInfo.height, bitmapInfo.stride);
+    //LOGI("width:%d height:%d stride:%d", bitmapInfo.width, bitmapInfo.height, bitmapInfo.stride);
     if (bitmapInfo.format != ANDROID_BITMAP_FORMAT_RGBA_8888)
     {
         LOGE("Bitmap format is not RGBA_8888!");
@@ -550,7 +550,7 @@ JNIEXPORT jboolean JNICALL Java_com_kirrupt_pdfiumandroid_PDFDocument_renderRect
         LOGE("AndroidBitmap_getInfo() failed ! error=%d", ret);
         return false;
     }
-    LOGI("width:%d height:%d stride:%d", bitmapInfo.width, bitmapInfo.height, bitmapInfo.stride);
+    //LOGI("width:%d height:%d stride:%d", bitmapInfo.width, bitmapInfo.height, bitmapInfo.stride);
     if (bitmapInfo.format != ANDROID_BITMAP_FORMAT_RGBA_8888)
     {
         LOGE("Bitmap format is not RGBA_8888!");
