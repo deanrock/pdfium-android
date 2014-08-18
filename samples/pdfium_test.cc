@@ -321,17 +321,9 @@ void RenderPdf(const char* name, const char* pBuf, size_t len,
 
 int main(int argc, const char* argv[]) {
   //v8::V8::InitializeICU();
-  OutputFormat format = OUTPUT_NONE;
+  OutputFormat format = OUTPUT_PPM;
   std::list<const char*> files;
-  if (!ParseCommandLine(argc, argv, &format, &files)) {
-    printf("Usage: pdfium_test [OPTIONS] [FILE]\n");
-    printf("--ppm    write page images <pdf-name>.<page-number>.ppm\n");
-#ifdef _WIN32
-    printf("--bmp    write page images <pdf-name>.<page-number>.bmp\n");
-    printf("--emf    write page meta files <pdf-name>.<page-number>.emf\n");
-#endif
-    return 1;
-  }
+    files.push_back("/Users/dean/Desktop/delo_20140816_20.pdf");
 
   FPDF_InitLibrary(NULL);
 

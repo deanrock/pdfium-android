@@ -540,6 +540,26 @@
       ],
     },
     {
+      'target_name': 'reflow',
+      'type': 'static_library',
+      'ldflags': [ '-L<(PRODUCT_DIR)',],
+      'sources': [
+        'core/include/reflow/fpdf_layout.h',
+        'core/include/reflow/reflowengine.h',
+
+        'core/src/reflow/autoreflow.cpp',
+        'core/src/reflow/autoreflow.h',
+        'core/src/reflow/layoutprocessor_reflow.cpp',
+        'core/src/reflow/layoutprovider_taggedpdf.cpp',
+        'core/src/reflow/layoutprovider_taggedpdf.h',
+        'core/src/reflow/reflowedpage.cpp',
+        'core/src/reflow/reflowedpage.h',
+        'core/src/reflow/reflowedtextpage.cpp',
+        'core/src/reflow/reflowedtextpage.h',
+        'core/src/reflow/reflowengine.cpp',
+      ],
+    },
+    {
       'target_name': 'fxge',
       'type': 'static_library',
       'ldflags': [ '-L<(PRODUCT_DIR)',],
