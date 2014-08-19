@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <sstream>
 #include <list>
 #include <string>
 #include <utility>
@@ -15,6 +16,8 @@
 #include "../fpdfsdk/include/fpdf_ext.h"
 #include "../fpdfsdk/include/fpdftext.h"
 #include "../fpdfsdk/include/fpdfview.h"
+#include "../core/include/fpdfapi/fpdf_page.h"
+#include "../core/include/fpdfapi/fpdf_pageobj.h"
 
 #ifdef _WIN32
   #define snprintf _snprintf
@@ -266,7 +269,7 @@ void RenderPdf(const char* name, const char* pBuf, size_t len,
   }
 
   (void) FPDF_GetDocPermissions(doc);
-
+    printf("blah path...\n");
   int first_page = FPDFAvail_GetFirstPageNum(doc);
   (void) FPDFAvail_IsPageAvail(pdf_avail, first_page, &hints);
 
@@ -274,14 +277,59 @@ void RenderPdf(const char* name, const char* pBuf, size_t len,
   for (int i = 0; i < page_count; ++i) {
     (void) FPDFAvail_IsPageAvail(pdf_avail, i, &hints);
   }
+    
+    printf("test\n\n");
 
   for (int i = 0; i < page_count; ++i) {
     FPDF_PAGE page = FPDF_LoadPage(doc, i);
     FPDF_TEXTPAGE text_page = FPDFText_LoadPage(page);
 
+      
+      CPDF_Page *p = (CPDF_Page*)page;
+      printf("lolz %d\n", p->CountObjects());
+      
+      printf("%f %f\n", FPDF_GetPageWidth(p), FPDF_GetPageHeight(p));
+      
+      int count = p->CountObjects();
+      
+      int width = static_cast<int>(FPDF_GetPageWidth(page));
+      int height = static_cast<int>(FPDF_GetPageHeight(page));
+      float click_x = 400, click_y = 400;
+      
+      float click_right = width - click_x,
+      click_bottom = height - click_y;
+      
+      printf("x %f, y %f, right %f, bottom %f\n", click_x, click_y,
+             click_right, click_bottom);
+      
+      int c = 0;
+      
+      std::stringstream out("");
+      
+      out << "{\"width\": "<<width<<", \"height\": "<<height<<", \"rects\": [";
+      for (int i = 0; i < count; i++) {
+          CPDF_PageObject *obj = p->GetObjectByIndex(i);
+          
+          if (obj->m_Top <= click_y &&
+              obj->m_Left <= click_x &&
+              obj->m_Right <= click_right &&
+              obj->m_Bottom <= click_bottom) {
+              c++;
+          }
+          
+          if (i>0) {
+              out<<", ";
+          }
+          
+          out << "{\"top\": "<<obj->m_Top<<", \"left\": "<<obj->m_Left<<", \"right\": "<<obj->m_Right<<", \"bottom\": "<<obj->m_Bottom<<"}";
+          
+          
+      }
+      
+      out << "]}";
+      printf("%s", out.str().c_str());
 
-    int width = static_cast<int>(FPDF_GetPageWidth(page));
-    int height = static_cast<int>(FPDF_GetPageHeight(page));
+    
     FPDF_BITMAP bitmap = FPDFBitmap_Create(width, height, 0);
     FPDFBitmap_FillRect(bitmap, 0, 0, width, height, 0xFFFFFFFF);
 
