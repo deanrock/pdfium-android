@@ -97,7 +97,7 @@ public class PDFReaderView extends Fragment {
 		
 		PDFReaderView.getMySerialExecutorSingleton().Execute(getActivity(), params);
 		
-		mDocView = new ReaderView(this.getActivity(), onPdfChangeListener) {
+		mDocView = new ReaderView(this.getActivity(), onPdfChangeListener, mItems, mSize) {
 			private boolean showButtonsDisabled;
 			
 			final int TAP_PAGE_MARGIN = 5;

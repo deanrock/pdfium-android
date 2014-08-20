@@ -1,5 +1,8 @@
 #include "../fpdfsdk/include/fpdfview.h"
 #include "../core/include/fxge/fx_dib.h"
+#include "../core/include/fpdfapi/fpdf_page.h"
+#include "../core/include/fpdfapi/fpdf_pageobj.h"
+
 #include "handle.h"
 #include "com_kirrupt_pdfiumandroid_PDFDocument.h"
 
@@ -28,6 +31,8 @@ public:
 	int getBufferWidth();
 	int getBufferHeight();
 	int getBufferStride();
+
+	void getPageObjects(int *&values, int *size);
 
 	bool renderRectangleWithScale(int width, int height, float scale, int start_x, int start_y, uint8_t *bitmap);
 	bool renderRectangle(int width, int height, int renderWidth, int renderHeight, int start_x, int start_y, uint8_t *bitmap);

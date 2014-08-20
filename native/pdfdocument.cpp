@@ -177,6 +177,47 @@ bool PDFDocument::renderRectangleWithScale(int width, int height, float scale, i
         start_x, start_y, bitmap);
 }
 
+void PDFDocument::getPageObjects(int *&values, int *size)
+{
+    if (page == NULL) {
+        return;
+    }
+
+    int width = static_cast<int>(FPDF_GetPageWidth(this->page));
+    int height = static_cast<int>(FPDF_GetPageHeight(this->page));
+
+    CPDF_Page *p = (CPDF_Page*)page;
+    *size = p->CountObjects() * 4;
+
+    values = new int[*size]();//behaves like calloc, zeroes all ints
+
+    if (values == NULL) {
+        *size = 0;
+        LOGE("f shouldnt be NULL!");
+        return;
+    }
+
+    for (int i = 0; i < *size/4; i++) {
+        CPDF_PageObject *obj = p->GetObjectByIndex(i);
+
+        if (obj == NULL) {
+            LOGD("obj is null!");
+            continue;
+        }
+
+        int x = i*4;
+        values[x] = obj->m_Left;
+        values[x+1] = height - obj->m_Top;
+        values[x+2] = obj->m_Right - obj->m_Left;
+        values[x+3] = obj->m_Top - obj->m_Bottom;
+
+        //x: rect.Left
+        //y: height - rect.Top
+        //width: rect.Right - rect.Left
+        //height: rect.Top - rect.Bottom
+    }
+}
+
 bool PDFDocument::renderRectangle(int width, int height, int renderWidth, int renderHeight, int start_x, int start_y, uint8_t *bitmap)
 {
     if (width <= 0 || height <= 0 || start_x < 0 || start_y < 0) {
@@ -601,3 +642,49 @@ JNIEXPORT jboolean JNICALL Java_com_kirrupt_pdfiumandroid_PDFDocument_renderRect
     return result;
   }
 
+
+/*
+ * Class:     com_kirrupt_pdfiumandroid_PDFDocument
+ * Method:    getPageObjects
+ * Signature: ([I)Z
+ */
+JNIEXPORT jintArray JNICALL Java_com_kirrupt_pdfiumandroid_PDFDocument_getPageObjects
+  (JNIEnv *env, jobject obj)
+  {
+    PDFDocument *reader = getHandle<PDFDocument>(env, obj);
+    
+    if (!reader) {
+        return (jintArray)env->NewIntArray(0);
+    }
+
+    int size = 0;
+    int *values = NULL;
+
+    jintArray arr;
+
+    reader->getPageObjects(values, &size);
+
+    if (size <= 0) {
+        LOGE("size should be bigger than 0!");
+        return arr;
+    }
+
+    if (values == NULL) {
+        LOGE("values (from getPageObjects) shouldnt be null");
+        return arr;
+    }
+
+    arr = (jintArray)env->NewIntArray(size);
+    
+    if (arr == NULL) {
+        LOGE("arr == NULL!!");
+        delete[] values;
+        return arr;
+    }
+
+    env->SetIntArrayRegion(arr, 0, size, (jint *)values);
+
+    delete[] values;
+
+    return arr;
+  }

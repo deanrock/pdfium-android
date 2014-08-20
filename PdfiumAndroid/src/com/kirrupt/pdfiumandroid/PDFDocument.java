@@ -11,6 +11,8 @@ public class PDFDocument {
 		initialise();
 	}
 	
+	public int[] pageObjects;
+	
 	public native void initialise();
 	public native boolean LoadDocument(String path);
 	public native boolean LoadPage(int pageNum);
@@ -65,4 +67,6 @@ public class PDFDocument {
 	
 	public native void closePage();
 	public native void closeDocument();
+	
+	public native int[] getPageObjects();
 }

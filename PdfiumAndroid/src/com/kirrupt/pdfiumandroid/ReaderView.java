@@ -1,24 +1,38 @@
 package com.kirrupt.pdfiumandroid;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.NoSuchElementException;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Point;
+import android.graphics.PointF;
 import android.graphics.Rect;
+import android.os.AsyncTask;
+import android.os.Environment;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.GestureDetector;
+import android.view.GestureDetector.OnDoubleTapListener;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
-import android.view.GestureDetector.OnDoubleTapListener;
 import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.Scroller;
-import android.widget.Toast;
 
 public class ReaderView
 		extends AdapterView<Adapter>
@@ -60,6 +74,9 @@ public class ReaderView
 	private int               mScrollerLastY;
 	private boolean           mScrollDisabled;
 	
+	private List<PDFPagerItem> mItems;
+	private PointF mSize;
+	
 	static abstract class ViewMapper {
 		abstract void applyToView(View view);
 	}
@@ -67,7 +84,7 @@ public class ReaderView
 	
 	OnPdfChangeListener onPdfChangeListener;
 
-	public ReaderView(Context context, OnPdfChangeListener onPdfChangeListener) {
+	public ReaderView(Context context, OnPdfChangeListener onPdfChangeListener, List<PDFPagerItem> items, PointF size) {
 		super(context);
 		
 		mGestureDetector = new GestureDetector(this);
@@ -75,6 +92,9 @@ public class ReaderView
 		mScroller        = new Scroller(context);
 		this.context = context;
 		this.onPdfChangeListener = onPdfChangeListener;
+		
+		mItems = items;
+		mSize = size;
 	}
 
 	public ReaderView(Context context, AttributeSet attrs) {
@@ -706,8 +726,63 @@ public class ReaderView
 	 */
 	@Override
 	public boolean onDoubleTap(MotionEvent e) {
-		Log.i("ReaderView", "onDoubleTap");
-		float previousScale = mScale;
+		Log.i("ReaderView", "onDoubleTap "+mCurrent);
+		
+		int viewFocusX = 0;
+		int viewFocusY = 0;
+		
+		View v = mChildViews.get(mCurrent);
+		if (v != null) {
+			// Work out the focus point relative to the view top left
+			viewFocusX = (int)e.getX() - (v.getLeft() + mXScroll);
+			viewFocusY = (int)e.getY() - (v.getTop() + mXScroll);
+		}
+		Log.i("ReaderView", "vF x: "+viewFocusX+", y: "+viewFocusY);
+		
+		if (mItems != null && mItems.size() > mCurrent) {
+			PDFPagerItem item = mItems.get(mCurrent);
+			Log.i("ReaderView", "vF x: "+viewFocusX+", y: "+viewFocusY+", fn: "+item.getFileName());
+			
+			int[] pageObjects = PDFReaderView.getMySerialExecutorSingleton().getNonBlockingPageObjectsForFileName(Environment.getExternalStorageDirectory()+"/"+item.getFileName());
+			
+			if (pageObjects != null) {
+				//x: rect.Left
+		        //y: height - rect.Top
+		        //width: rect.Right - rect.Left
+		        //height: rect.Top - rect.Bottom
+				
+				float ratio = v.getWidth() / mSize.x;
+				
+				float click_x = viewFocusX / ratio;
+				float click_y = viewFocusY / ratio;
+				Log.i("ReaderView", "click x: "+click_x+", y: "+click_y);
+				
+				int count = pageObjects.length / 4;
+				
+				Log.i("ReaderView", "pageObjects "+pageObjects.length);
+				
+				int c= 0;
+				if (pageObjects.length % 4 == 0) {
+					for(int i = 0; i < count*4; i+=4) {
+						if (pageObjects[i] <= click_x &&
+								pageObjects[i+1] <= click_y &&
+										pageObjects[i] + pageObjects[i+2] > click_x &&
+										pageObjects[i+1] + pageObjects[i+3] > click_y) {
+							Log.d("ReaderView", "found!");
+							c++;
+						}
+					}
+					
+				}else{
+					Log.e("ReaderView", "pageObjects.length % 4 > 0!");
+				}
+				Log.d("ReaderView", "found items: "+c);
+			}
+			
+		}else{
+			Log.d("ReaderView", "mCurrent > size() or mItems==null, mCurrent "+mCurrent);
+		}
+		/*float previousScale = mScale;
 
 		Log.i("ReaderView"," "+previousScale+" "+mScale);
 		if(mScale<=1.0f){
@@ -738,7 +813,7 @@ public class ReaderView
 				mYScroll += viewFocusY - viewFocusY * factor;
 				requestLayout();
 			}
-		}
+		}*/
 
 		return true;
 	}

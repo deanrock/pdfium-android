@@ -3,6 +3,7 @@ package com.kirrupt.pdfiumandroid;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -24,6 +25,8 @@ public class MySerialExecutor extends SerialExecutor {
 	private static boolean isReaderInitialized = false;
 	private static PDFReader reader;
 	
+	private ConcurrentHashMap<String, int[]> mPageObjects;
+	
 	private HashMap<String, PDFDocument> mDocuments;
 	
 	public Future<Bitmap> Execute(Context context, RenderRectangleParams params) {
@@ -40,10 +43,15 @@ public class MySerialExecutor extends SerialExecutor {
 		return bitmap;
 	}
 	
+	public int[] getNonBlockingPageObjectsForFileName(String fileName) {
+		return mPageObjects.get(fileName);
+	}
+	
 	public MySerialExecutor() {
 		super();
 		
 		mDocuments = new HashMap<String, PDFDocument>();
+		mPageObjects = new ConcurrentHashMap<String, int[]>();
 	}
 	
 	@Override
@@ -65,6 +73,8 @@ public class MySerialExecutor extends SerialExecutor {
 			document.closeDocument();
 			it.remove();
 		}
+		
+		mPageObjects.clear();
 	}
 
 	@Override
@@ -111,6 +121,16 @@ public class MySerialExecutor extends SerialExecutor {
 				}
 
 				mDocuments.put(params.getFileName(), mDocument);
+				
+				//load page objects
+				int[] array = mDocument.getPageObjects();
+				
+				if (array != null) {
+					//mDocument.pageObjects = array;
+					mPageObjects.put(params.getFileName(), array);
+				}
+				
+				Log.i("MySerialExecutor", "success: "+array.length);
 			}
 
 			mDocument = mDocuments.get(params.getFileName());
@@ -151,6 +171,10 @@ public class MySerialExecutor extends SerialExecutor {
 					document.closePage();
 					document.closeDocument();
 					mDocuments.remove(params.getFileName());
+					
+					if (mPageObjects.containsKey(params.getFileName())) {
+						mPageObjects.remove(params.getFileName());
+					}
 				}
 				
 				Log.i("MySerialExecutor", "document closed "+params.getFileName());
