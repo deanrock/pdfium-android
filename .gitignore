@@ -16,3 +16,9 @@ Makefile
 *.user
 *.vcxproj
 *.xcodeproj
+.vagrant
+*.ppm
+*.json
+*.pdf
+pdf-objects/cpptest/
+

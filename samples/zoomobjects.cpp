@@ -82,8 +82,8 @@ std::string getRectangles(int width, int height, std::vector<Rectangle>objects)
         //}
     }
     
-    printf("count: %d", (int)objects.size());
-    printf("count: %d", (int)zoomRectangles.size());
+    //printf("count: %d", (int)objects.size());
+    //printf("count: %d", (int)zoomRectangles.size());
     
     /* JSON */
     std::stringstream out("");
