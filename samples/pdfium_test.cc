@@ -19,6 +19,9 @@
 #include "../core/include/fpdfapi/fpdf_page.h"
 #include "../core/include/fpdfapi/fpdf_pageobj.h"
 
+#include "zoomobjects.h"
+#include <vector>
+
 #ifdef _WIN32
   #define snprintf _snprintf
 #endif
@@ -291,23 +294,31 @@ void RenderPdf(const char* name, const char* pBuf, size_t len,
       
       std::stringstream out("");
       
-      out << "{\"width\": "<<width<<", \"height\": "<<height<<", \"rects\": [";
+      std::vector<Rectangle> rectangles;
+      
       for (int i = 0; i < count; i++) {
           CPDF_PageObject *obj = p->GetObjectByIndex(i);
           
-          if (i>0) {
-              out<<", ";
-          }
+          Rectangle *r = new Rectangle();
+          r->top =static_cast<int>((height-obj->m_Top));
+          r->left =static_cast<int>(obj->m_Left);
+          r->right =static_cast<int>((obj->m_Right));
+          r->bottom = static_cast<int>((height-obj->m_Top + obj->m_Top - obj->m_Bottom));
           
-          out << "{\"top\": "<<static_cast<int>((height-obj->m_Top))
-              <<", \"left\": "<<static_cast<int>(obj->m_Left)
-              <<", \"width\": "<<static_cast<int>((obj->m_Right-obj->m_Left))
-              <<", \"height\": "<<static_cast<int>((obj->m_Top - obj->m_Bottom))
-              <<"}";
+          rectangles.push_back(*r);
       }
       
-      out << "]}";
-      printf("%s", out.str().c_str());
+      FILE *f = fopen("/Users/dean/Desktop/pdf-objects/draw.json", "w");
+      if (f == NULL)
+      {
+          printf("Error opening file!\n");
+          exit(1);
+      }
+      
+      
+      fprintf(f, "%s", getRectangles(width, height, rectangles).c_str());
+
+      fclose(f);
 
     
     FPDF_BITMAP bitmap = FPDFBitmap_Create(width, height, 0);
@@ -351,7 +362,9 @@ int main(int argc, const char* argv[]) {
   //v8::V8::InitializeICU();
   OutputFormat format = OUTPUT_PPM;
   std::list<const char*> files;
-    files.push_back(argv[1]);
+    //files.push_back(argv[1]);
+    
+    files.push_back("/Users/dean/Desktop/pdf-objects/01_0821_DELO_1.pdf");
 
   FPDF_InitLibrary(NULL);
 
