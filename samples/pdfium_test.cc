@@ -235,7 +235,7 @@ void Add_Segment(FX_DOWNLOADHINTS* pThis, size_t offset, size_t size) {
 
 void RenderPdf(const char* name, const char* pBuf, size_t len,
                OutputFormat format) {
-  printf("Rendering PDF file %s.\n", name);
+  //printf("Rendering PDF file %s.\n", name);
 
   TestLoader loader(pBuf, len);
 
@@ -261,15 +261,15 @@ void RenderPdf(const char* name, const char* pBuf, size_t len,
   (void) FPDFAvail_IsDocAvail(pdf_avail, &hints);
 
   if (!FPDFAvail_IsLinearized(pdf_avail)) {
-    printf("Non-linearized path...\n");
+    //printf("Non-linearized path...\n");
     doc = FPDF_LoadCustomDocument(&file_access, NULL);
   } else {
-    printf("Linearized path...\n");
+    //printf("Linearized path...\n");
     doc = FPDFAvail_GetDocument(pdf_avail, NULL);
   }
 
   (void) FPDF_GetDocPermissions(doc);
-    printf("blah path...\n");
+
   int first_page = FPDFAvail_GetFirstPageNum(doc);
   (void) FPDFAvail_IsPageAvail(pdf_avail, first_page, &hints);
 
@@ -277,8 +277,6 @@ void RenderPdf(const char* name, const char* pBuf, size_t len,
   for (int i = 0; i < page_count; ++i) {
     (void) FPDFAvail_IsPageAvail(pdf_avail, i, &hints);
   }
-    
-    printf("test\n\n");
 
   for (int i = 0; i < page_count; ++i) {
     FPDF_PAGE page = FPDF_LoadPage(doc, i);
@@ -286,23 +284,10 @@ void RenderPdf(const char* name, const char* pBuf, size_t len,
 
       
       CPDF_Page *p = (CPDF_Page*)page;
-      printf("lolz %d\n", p->CountObjects());
-      
-      printf("%f %f\n", FPDF_GetPageWidth(p), FPDF_GetPageHeight(p));
-      
       int count = p->CountObjects();
       
       int width = static_cast<int>(FPDF_GetPageWidth(page));
       int height = static_cast<int>(FPDF_GetPageHeight(page));
-      float click_x = 400, click_y = 400;
-      
-      float click_right = width - click_x,
-      click_bottom = height - click_y;
-      
-      printf("x %f, y %f, right %f, bottom %f\n", click_x, click_y,
-             click_right, click_bottom);
-      
-      int c = 0;
       
       std::stringstream out("");
       
@@ -310,20 +295,15 @@ void RenderPdf(const char* name, const char* pBuf, size_t len,
       for (int i = 0; i < count; i++) {
           CPDF_PageObject *obj = p->GetObjectByIndex(i);
           
-          if (obj->m_Top <= click_y &&
-              obj->m_Left <= click_x &&
-              obj->m_Right <= click_right &&
-              obj->m_Bottom <= click_bottom) {
-              c++;
-          }
-          
           if (i>0) {
               out<<", ";
           }
           
-          out << "{\"top\": "<<obj->m_Top<<", \"left\": "<<obj->m_Left<<", \"right\": "<<obj->m_Right<<", \"bottom\": "<<obj->m_Bottom<<"}";
-          
-          
+          out << "{\"top\": "<<static_cast<int>((height-obj->m_Top))
+              <<", \"left\": "<<static_cast<int>(obj->m_Left)
+              <<", \"width\": "<<static_cast<int>((obj->m_Right-obj->m_Left))
+              <<", \"height\": "<<static_cast<int>((obj->m_Top - obj->m_Bottom))
+              <<"}";
       }
       
       out << "]}";
@@ -364,14 +344,14 @@ void RenderPdf(const char* name, const char* pBuf, size_t len,
   FPDF_CloseDocument(doc);
   FPDFAvail_Destroy(pdf_avail);
 
-  printf("Loaded, parsed and rendered %d pages.\n", page_count);
+  //printf("Loaded, parsed and rendered %d pages.\n", page_count);
 }
 
 int main(int argc, const char* argv[]) {
   //v8::V8::InitializeICU();
   OutputFormat format = OUTPUT_PPM;
   std::list<const char*> files;
-    files.push_back("/Users/dean/Desktop/delo_20140816_20.pdf");
+    files.push_back(argv[1]);
 
   FPDF_InitLibrary(NULL);
 
