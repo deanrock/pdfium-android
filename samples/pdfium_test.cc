@@ -35,6 +35,8 @@ enum OutputFormat {
 #endif
 };
 
+const char *jsonFile;
+
 static void WritePpm(const char* pdf_name, int num, const void* buffer_void,
                      int stride, int width, int height) {
   const char* buffer = reinterpret_cast<const char*>(buffer_void);
@@ -308,7 +310,10 @@ void RenderPdf(const char* name, const char* pBuf, size_t len,
           rectangles.push_back(*r);
       }
       
-      FILE *f = fopen("/Users/dean/Desktop/pdf-objects/draw.json", "w");
+      char filename[256];
+      snprintf(filename, sizeof(filename), "%s.%d.json", name, i);
+
+      FILE *f = fopen(filename, "w");
       if (f == NULL)
       {
           printf("Error opening file!\n");
@@ -362,9 +367,11 @@ int main(int argc, const char* argv[]) {
   //v8::V8::InitializeICU();
   OutputFormat format = OUTPUT_PPM;
   std::list<const char*> files;
-    //files.push_back(argv[1]);
+    files.push_back(argv[1]);
     
-    files.push_back("/Users/dean/Desktop/pdf-objects/01_0821_DELO_1.pdf");
+    //jsonFile = argv[2];
+    
+    //files.push_back("/Users/dean/Desktop/pdf-objects/01_0821_DELO_1.pdf");
 
   FPDF_InitLibrary(NULL);
 

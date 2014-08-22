@@ -15,6 +15,8 @@
       'target_name': 'pdfium_test',
       'sources': [
         'pdfium_test.cc',
+        'zoombojects.h',
+        'zoomobjects.cpp',
       ],
     },
   ],
