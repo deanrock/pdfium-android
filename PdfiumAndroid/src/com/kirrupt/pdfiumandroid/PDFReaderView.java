@@ -3,8 +3,6 @@ package com.kirrupt.pdfiumandroid;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.Future;
-import java.util.concurrent.locks.ReentrantLock;
 
 import com.kirrupt.pdfiumandroid.MySerialExecutor.RenderRectangleParams;
 
@@ -12,7 +10,6 @@ import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.ActivityManager.MemoryInfo;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.PointF;
 import android.os.Bundle;
 import android.os.Debug;
@@ -71,6 +68,7 @@ public class PDFReaderView extends Fragment {
 	public PDFReaderView(List<PDFPagerItem> items, PointF size, OnPdfChangeListener onPdfChangeListener) {
 		mItems = items;
 		mSize = size;
+		
 		this.onPdfChangeListener = onPdfChangeListener;
 	}
 	
@@ -90,14 +88,12 @@ public class PDFReaderView extends Fragment {
 	private View createUI(Bundle savedInstanceState) {
 		RelativeLayout layout = new RelativeLayout(this.getActivity());
 		
-		Log.i("PDFReaderView", "createUI called");
-
 		RenderRectangleParams params = new RenderRectangleParams();
 		params.setCommand(MySerialExecutor.CLOSE_ALL);
 		
 		PDFReaderView.getMySerialExecutorSingleton().Execute(getActivity(), params);
 		
-		mDocView = new ReaderView(this.getActivity(), onPdfChangeListener, mItems, mSize) {
+		mDocView = new ReaderView(this.getActivity(), onPdfChangeListener, mItems, mSize, this) {
 			private boolean showButtonsDisabled;
 			
 			final int TAP_PAGE_MARGIN = 5;
@@ -147,7 +143,7 @@ public class PDFReaderView extends Fragment {
 			protected void onSettle(View v) {
 				// When the layout has settled ask the page to render
 				// in HQ
-				((PageView)v).addHq(true);
+				((PageView)v).addHq(false);
 			}
 
 			@Override
@@ -197,8 +193,6 @@ public class PDFReaderView extends Fragment {
 	public void onDestroy() {
 		// TODO Auto-generated method stub
 		super.onDestroy();
-		
-		Log.i("PDFReaderView", "onDestroy called");
 		
 		RenderRectangleParams params = new RenderRectangleParams();
 		params.setCommand(MySerialExecutor.CLOSE_READER);

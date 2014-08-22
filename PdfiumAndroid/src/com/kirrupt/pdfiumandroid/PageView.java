@@ -464,6 +464,7 @@ public class PageView extends ViewGroup {
 	}
 
 	public void update() {
+		Log.i("PageView", "update called");
 		// Cancel pending render task
 		if (mDrawEntire != null) {
 			mDrawEntire.cancel(true);
