@@ -69,4 +69,5 @@ public class PDFDocument {
 	public native void closeDocument();
 	
 	public native int[] getPageObjects();
+	public native int[] getPageObjectsSmart();
 }

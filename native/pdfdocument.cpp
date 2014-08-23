@@ -1,4 +1,5 @@
 #include "PDFDocument.h"
+#include "zoomobjects.h"
 #include <android/bitmap.h>
 #include <android/log.h>
 
@@ -175,6 +176,60 @@ bool PDFDocument::renderRectangleWithScale(int width, int height, float scale, i
 
     return this->renderRectangle(width, height, renderWidth, renderHeight,
         start_x, start_y, bitmap);
+}
+
+void PDFDocument::getPageObjectsSmart(int *& values, int *size)
+{
+	int width = static_cast<int>(FPDF_GetPageWidth(this->page));
+    int height = static_cast<int>(FPDF_GetPageHeight(this->page));
+
+    std::vector<Rectangle>objects;
+
+    CPDF_Page *p = (CPDF_Page*)page;
+
+    int count = p->CountObjects();
+    for (int i = 0; i < count; i++) {
+        CPDF_PageObject *obj = p->GetObjectByIndex(i);
+
+        if (obj == NULL) {
+            LOGD("obj is null!");
+            continue;
+        }
+
+        Rectangle *r = new Rectangle();
+		r->top =static_cast<int>((height-obj->m_Top));
+		r->left =static_cast<int>(obj->m_Left);
+		r->right =static_cast<int>((obj->m_Right));
+		r->bottom = static_cast<int>((height-obj->m_Top + obj->m_Top - obj->m_Bottom));
+
+		objects.push_back(*r);
+	}
+
+	std::vector<Rectangle*>rectangles = getRectangles(width, height, objects);
+
+	*size = rectangles.size() * 4;
+
+	values = new int[*size]();//behaves like calloc, zeroes all ints
+
+    if (values == NULL) {
+        *size = 0;
+        LOGE("f shouldnt be NULL!");
+        return;
+    }
+
+    for (int i = 0; i < *size/4; i++) {
+        int x = i*4;
+        Rectangle *r = rectangles.at(i);
+        values[x] = r->left;
+        values[x+1] = r->top;
+        values[x+2] = r->right;
+        values[x+3] = r->bottom;
+    }
+
+    for(int i = 0; i < objects.size(); i++) {
+    	Rectangle *r = &objects.at(i);
+    	delete r;
+    }
 }
 
 void PDFDocument::getPageObjects(int *&values, int *size)
@@ -663,6 +718,53 @@ JNIEXPORT jintArray JNICALL Java_com_kirrupt_pdfiumandroid_PDFDocument_getPageOb
     jintArray arr;
 
     reader->getPageObjects(values, &size);
+
+    if (size <= 0) {
+        LOGE("size should be bigger than 0!");
+        return arr;
+    }
+
+    if (values == NULL) {
+        LOGE("values (from getPageObjects) shouldnt be null");
+        return arr;
+    }
+
+    arr = (jintArray)env->NewIntArray(size);
+    
+    if (arr == NULL) {
+        LOGE("arr == NULL!!");
+        delete[] values;
+        return arr;
+    }
+
+    env->SetIntArrayRegion(arr, 0, size, (jint *)values);
+
+    delete[] values;
+
+    return arr;
+  }
+
+
+/*
+ * Class:     com_kirrupt_pdfiumandroid_PDFDocument
+ * Method:    getPageObjectsSmart
+ * Signature: ()[I
+ */
+JNIEXPORT jintArray JNICALL Java_com_kirrupt_pdfiumandroid_PDFDocument_getPageObjectsSmart
+  (JNIEnv *env, jobject obj)
+  {
+  	PDFDocument *reader = getHandle<PDFDocument>(env, obj);
+    
+    if (!reader) {
+        return (jintArray)env->NewIntArray(0);
+    }
+
+    int size = 0;
+    int *values = NULL;
+
+    jintArray arr;
+
+    reader->getPageObjectsSmart(values, &size);
 
     if (size <= 0) {
         LOGE("size should be bigger than 0!");

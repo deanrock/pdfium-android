@@ -33,6 +33,7 @@ public:
 	int getBufferStride();
 
 	void getPageObjects(int *&values, int *size);
+	void getPageObjectsSmart(int *& values, int *size);
 
 	bool renderRectangleWithScale(int width, int height, float scale, int start_x, int start_y, uint8_t *bitmap);
 	bool renderRectangle(int width, int height, int renderWidth, int renderHeight, int start_x, int start_y, uint8_t *bitmap);

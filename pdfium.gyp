@@ -673,6 +673,8 @@
         'native/pdfdocument.h',
         'native/pdfdocument.cpp',
         'native/com_kirrupt_pdfiumandroid_PDFDocument.h',
+        'native/zoomobjects.h',
+        'native/zoomobjects.cpp',
       ],
     },
   ],

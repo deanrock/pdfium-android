@@ -159,6 +159,14 @@ JNIEXPORT void JNICALL Java_com_kirrupt_pdfiumandroid_PDFDocument_closeDocument
 JNIEXPORT jintArray JNICALL Java_com_kirrupt_pdfiumandroid_PDFDocument_getPageObjects
   (JNIEnv *, jobject);
 
+/*
+ * Class:     com_kirrupt_pdfiumandroid_PDFDocument
+ * Method:    getPageObjectsSmart
+ * Signature: ()[I
+ */
+JNIEXPORT jintArray JNICALL Java_com_kirrupt_pdfiumandroid_PDFDocument_getPageObjectsSmart
+  (JNIEnv *, jobject);
+
 #ifdef __cplusplus
 }
 #endif
