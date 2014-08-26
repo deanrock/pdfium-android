@@ -123,7 +123,7 @@ public class MySerialExecutor extends SerialExecutor {
 				mDocuments.put(params.getFileName(), mDocument);
 				
 				//load page objects
-				int[] array = mDocument.getPageObjects();
+				int[] array = mDocument.getPageObjectsSmart();
 				
 				if (array != null) {
 					//mDocument.pageObjects = array;

@@ -183,7 +183,7 @@ void PDFDocument::getPageObjectsSmart(int *& values, int *size)
 	int width = static_cast<int>(FPDF_GetPageWidth(this->page));
     int height = static_cast<int>(FPDF_GetPageHeight(this->page));
 
-    std::vector<Rectangle>objects;
+    std::vector<Rectangle*>objects;
 
     CPDF_Page *p = (CPDF_Page*)page;
 
@@ -202,8 +202,11 @@ void PDFDocument::getPageObjectsSmart(int *& values, int *size)
 		r->right =static_cast<int>((obj->m_Right));
 		r->bottom = static_cast<int>((height-obj->m_Top + obj->m_Top - obj->m_Bottom));
 
-		objects.push_back(*r);
+		objects.push_back(r);
 	}
+
+	//*size = 4;
+	//values = new int[*size]();
 
 	std::vector<Rectangle*>rectangles = getRectangles(width, height, objects);
 
@@ -227,7 +230,7 @@ void PDFDocument::getPageObjectsSmart(int *& values, int *size)
     }
 
     for(int i = 0; i < objects.size(); i++) {
-    	Rectangle *r = &objects.at(i);
+    	Rectangle *r = objects.at(i);
     	delete r;
     }
 }

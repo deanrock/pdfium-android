@@ -68,15 +68,15 @@ implements GestureDetector.OnGestureListener, ScaleGestureDetector.OnScaleGestur
 	private boolean           mScrollDisabled;
 	
 	private float mMeasuredWidth = 0.0f;
-
-	private Animator mCurrentAnimator;
-	private int mShortAnimationDuration;
+	private float mMeasuredHeight = 0.0f;
 
 	private List<PDFPagerItem> mItems;
 	private PointF mSize;
 	
 	private Fragment mParent;
 
+	private boolean smartZoom = false;
+	
 	static abstract class ViewMapper {
 		abstract void applyToView(View view);
 	}
@@ -96,10 +96,6 @@ implements GestureDetector.OnGestureListener, ScaleGestureDetector.OnScaleGestur
 		mItems = items;
 		mSize = size;
 		mParent = parent;
-
-		// Retrieve and cache the system's default "short" animation time.
-		mShortAnimationDuration = getResources().getInteger(
-				android.R.integer.config_shortAnimTime);
 	}
 
 	public int getDisplayedViewIndex() {
@@ -353,6 +349,7 @@ implements GestureDetector.OnGestureListener, ScaleGestureDetector.OnScaleGestur
 
 	@Override
 	public boolean onScaleBegin(ScaleGestureDetector detector) {
+		smartZoom = false;
 		mScaling = true;
 		// Ignore any scroll amounts yet to be accounted for: the
 		// screen is not showing the effect of them, so they can
@@ -601,11 +598,12 @@ implements GestureDetector.OnGestureListener, ScaleGestureDetector.OnScaleGestur
 		v.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
 
 		mMeasuredWidth = v.getMeasuredWidth();
+		mMeasuredHeight = v.getMeasuredHeight();
 		
 		// Work out a scale that will fit it to this view
 		float scale = Math.min((float)getWidth()/(float)v.getMeasuredWidth(),
 				(float)getHeight()/(float)v.getMeasuredHeight());
-		Log.i("ReaderView", "measureView scale: "+scale+", mScale: "+mScale + ", gMW: "+v.getMeasuredWidth());
+		//Log.i("ReaderView", "measureView scale: "+scale+", mScale: "+mScale + ", gMW: "+v.getMeasuredWidth());
 		// Use the fitting values scaled by our current scale factor
 		v.measure(View.MeasureSpec.EXACTLY | (int)(v.getMeasuredWidth()*scale*mScale),
 				View.MeasureSpec.EXACTLY | (int)(v.getMeasuredHeight()*scale*mScale));
@@ -714,9 +712,13 @@ implements GestureDetector.OnGestureListener, ScaleGestureDetector.OnScaleGestur
 			viewFocusX = (int)e.getX() - (v.getLeft() + mXScroll);
 			viewFocusY = (int)e.getY() - (v.getTop() + mXScroll);
 		}
-		//Log.i("ReaderView", "vF x: "+viewFocusX+", y: "+viewFocusY);
 
 		Rect selectedRect = null;
+		
+		float ratio = v.getWidth() / mSize.x;
+		
+		float click_x = viewFocusX / ratio;
+		float click_y = viewFocusY / ratio;
 
 		if (mItems != null && mItems.size() > mCurrent) {
 			PDFPagerItem item = mItems.get(mCurrent);
@@ -729,11 +731,7 @@ implements GestureDetector.OnGestureListener, ScaleGestureDetector.OnScaleGestur
 				//y: height - rect.Top
 				//width: rect.Right - rect.Left
 				//height: rect.Top - rect.Bottom
-
-				float ratio = v.getWidth() / mSize.x;
-
-				float click_x = viewFocusX / ratio;
-				float click_y = viewFocusY / ratio;
+				
 				Log.i("ReaderView", "click x: "+click_x+", y: "+click_y);
 
 				int count = pageObjects.length / 4;
@@ -742,16 +740,16 @@ implements GestureDetector.OnGestureListener, ScaleGestureDetector.OnScaleGestur
 
 				if (pageObjects.length % 4 == 0) {
 					for(int i = 0; i < count*4; i+=4) {
-						if (pageObjects[i] <= click_x &&
-								pageObjects[i+1] <= click_y &&
-								pageObjects[i] + pageObjects[i+2] > click_x &&
-								pageObjects[i+1] + pageObjects[i+3] > click_y) {
+						if (pageObjects[i] <= click_x &&//top
+								pageObjects[i+1] <= click_y && //left
+								pageObjects[i+2] > click_x && //right
+								pageObjects[i+3] > click_y) { //left
 
 							selectedRect = new Rect();
 							selectedRect.left = pageObjects[i];
 							selectedRect.top = pageObjects[i+1];
-							selectedRect.right = pageObjects[i] + pageObjects[i+2];
-							selectedRect.bottom = pageObjects[i+1] + pageObjects[i+3];
+							selectedRect.right = pageObjects[i+2];
+							selectedRect.bottom = pageObjects[i+3];
 							break;
 						}
 					}
@@ -759,85 +757,6 @@ implements GestureDetector.OnGestureListener, ScaleGestureDetector.OnScaleGestur
 				}else{
 					Log.e("ReaderView", "pageObjects.length % 4 > 0!");
 				}
-
-
-				// Calculate the starting and ending bounds for the zoomed-in image.
-				// This step involves lots of math. Yay, math.
-				/* final Rect startBounds = new Rect();
-				    final Rect finalBounds = new Rect();
-				    final Point globalOffset = new Point();
-
-				    // The start bounds are the global visible rectangle of the thumbnail,
-				    // and the final bounds are the global visible rectangle of the container
-				    // view. Also set the container view's offset as the origin for the
-				    // bounds, since that's the origin for the positioning animation
-				    // properties (X, Y).
-				    //thumbView.getGlobalVisibleRect(startBounds);
-				    findViewById(R.id.container)
-				            .getGlobalVisibleRect(finalBounds, globalOffset);
-				    startBounds.offset(-globalOffset.x, -globalOffset.y);
-				    finalBounds.offset(-globalOffset.x, -globalOffset.y);
-
-				    // Adjust the start bounds to be the same aspect ratio as the final
-				    // bounds using the "center crop" technique. This prevents undesirable
-				    // stretching during the animation. Also calculate the start scaling
-				    // factor (the end scaling factor is always 1.0).
-				    float startScale;
-				    if ((float) finalBounds.width() / finalBounds.height()
-				            > (float) startBounds.width() / startBounds.height()) {
-				        // Extend start bounds horizontally
-				        startScale = (float) startBounds.height() / finalBounds.height();
-				        float startWidth = startScale * finalBounds.width();
-				        float deltaWidth = (startWidth - startBounds.width()) / 2;
-				        startBounds.left -= deltaWidth;
-				        startBounds.right += deltaWidth;
-				    } else {
-				        // Extend start bounds vertically
-				        startScale = (float) startBounds.width() / finalBounds.width();
-				        float startHeight = startScale * finalBounds.height();
-				        float deltaHeight = (startHeight - startBounds.height()) / 2;
-				        startBounds.top -= deltaHeight;
-				        startBounds.bottom += deltaHeight;
-				    }
-
-				    // Hide the thumbnail and show the zoomed-in view. When the animation
-				    // begins, it will position the zoomed-in view in the place of the
-				    // thumbnail.
-				    //thumbView.setAlpha(0f);
-				    //expandedImageView.setVisibility(View.VISIBLE);
-
-				    // Set the pivot point for SCALE_X and SCALE_Y transformations
-				    // to the top-left corner of the zoomed-in view (the default
-				    // is the center of the view).
-				    //expandedImageView.setPivotX(0f);
-				    //expandedImageView.setPivotY(0f);
-
-				    // Construct and run the parallel animation of the four translation and
-				    // scale properties (X, Y, SCALE_X, and SCALE_Y).
-				    /*AnimatorSet set = new AnimatorSet();
-				    set
-				            .play(ObjectAnimator.ofFloat(this, View.X,
-				                    startBounds.left, finalBounds.left))
-				            .with(ObjectAnimator.ofFloat(this, View.Y,
-				                    startBounds.top, finalBounds.top))
-				            .with(ObjectAnimator.ofFloat(this, View.SCALE_X,
-				            startScale, 1f)).with(ObjectAnimator.ofFloat(this,
-				                    View.SCALE_Y, startScale, 1f));
-				    set.setDuration(mShortAnimationDuration);
-				    set.setInterpolator(new DecelerateInterpolator());
-				    set.addListener(new AnimatorListenerAdapter() {
-				        @Override
-				        public void onAnimationEnd(Animator animation) {
-				            mCurrentAnimator = null;
-				        }
-
-				        @Override
-				        public void onAnimationCancel(Animator animation) {
-				            mCurrentAnimator = null;
-				        }
-				    });
-				    set.start();*/
-				//mCurrentAnimator = set;
 			}
 
 		}else{
@@ -847,45 +766,52 @@ implements GestureDetector.OnGestureListener, ScaleGestureDetector.OnScaleGestur
 		if (selectedRect != null) {
 			Log.i("ReaderView", "found rect!");
 			
+			smartZoom = true;
+			
 			int width = selectedRect.right - selectedRect.left;
 			Log.i("ReaderView", "width " +width);
 			
-			int point_x = selectedRect.left + selectedRect.width()/2;
-			int point_y = selectedRect.top + selectedRect.height()/2;
+			int padding = 20;
 			
-			float previousScale = mScale;
+			int point_x = selectedRect.left - padding/2;
+			int point_y = (int) click_y;//selectedRect.top;// (int)((float)selectedRect.top + (float)selectedRect.height()/(float)2 * (float)ratio);//fiX THIS!
 			
-			float width_padding = width + 20;
+			float width_padding = width + padding;
 			
-			//mScale = (this.getWidth() / mSize.x) * (mSize.x / (float)width);
 			mScale = mSize.x / width_padding * this.getWidth() / mMeasuredWidth;
-			Log.i("ReaderView", "width1: "+this.getWidth()+", "+"width: "+width+", scale:"+mScale+", prev: "+previousScale+ ", mSize: "+mSize.x);
-			
-			float factor = mScale/previousScale;
 			
 			viewFocusX = (int)e.getX() - (v.getLeft() + mXScroll);
 			viewFocusY = (int)e.getY() - (v.getTop() + mXScroll);
 			
 			if (v != null) {
-				mXScroll += viewFocusX - viewFocusX * factor;
-				mYScroll += viewFocusY - viewFocusY * factor;
+				float ratiox = mMeasuredWidth / mSize.x;
+				
+				int moveX = (int)(point_x *ratiox *mScale);
+				int moveY = (int)(point_y *ratiox *mScale) - (int)mMeasuredHeight/2;
+				mXScroll =-v.getLeft() - moveX;
+				mYScroll =-v.getTop() - moveY;
+
 				requestLayout();
 			}
 		}else{
-			float previousScale = mScale;
+			smartZoom = false;
+			/*;
 
 			Log.i("ReaderView"," "+previousScale+" "+mScale);
 			if(mScale<=1.0f){
 				mScale = 2.5f;
 			}else{
 				mScale = 1.0f;			
-			}
+			}*/
+			
+			float previousScale = mScale;
+			mScale = 1.0f;
 
 			float factor = mScale/previousScale;
 
 			if (v != null) {
-				mXScroll += viewFocusX - viewFocusX * factor;
-				mYScroll += viewFocusY - viewFocusY * factor;
+				mXScroll = -v.getLeft();//+= viewFocusX - viewFocusX * factor;
+				mYScroll = -v.getTop();// viewFocusY - viewFocusY * factor;
 				requestLayout();
 			}
 		}

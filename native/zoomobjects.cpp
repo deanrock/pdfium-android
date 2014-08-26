@@ -28,17 +28,17 @@ void Rectangle::append(Rectangle *rect)
     }
 }
 
-std::vector<Rectangle*> getRectangles(int width, int height, std::vector<Rectangle>objects)
+std::vector<Rectangle*> getRectangles(int width, int height, std::vector<Rectangle*>objects)
 {
     std::vector<Rectangle*>left;
     std::vector<Rectangle*>zoomRectangles;
     
     for (int i = 0; i < (int)objects.size(); i++) {
-        left.push_back(&objects.at(i));
+        left.push_back(objects.at(i));
     }
     
     for (int i = 0; i < (int)objects.size(); i++) {
-        Rectangle *rect = &objects.at(i);
+        Rectangle *rect = objects.at(i);
         
         Rectangle *zoom;
         

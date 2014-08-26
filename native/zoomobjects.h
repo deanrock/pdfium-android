@@ -24,6 +24,6 @@ public:
     void append(Rectangle *rect);
 };
 
-std::vector<Rectangle*> getRectangles(int width, int height, std::vector<Rectangle>objects);
+std::vector<Rectangle*> getRectangles(int width, int height, std::vector<Rectangle*>objects);
 
 #endif /* defined(__samples__zoomobjects__) */
