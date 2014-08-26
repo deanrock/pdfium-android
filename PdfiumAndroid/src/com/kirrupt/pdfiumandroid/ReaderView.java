@@ -66,17 +66,17 @@ implements GestureDetector.OnGestureListener, ScaleGestureDetector.OnScaleGestur
 	private int               mScrollerLastX;
 	private int               mScrollerLastY;
 	private boolean           mScrollDisabled;
-	
+
 	private float mMeasuredWidth = 0.0f;
 	private float mMeasuredHeight = 0.0f;
 
 	private List<PDFPagerItem> mItems;
 	private PointF mSize;
-	
+
 	private Fragment mParent;
 
 	private boolean smartZoom = false;
-	
+
 	static abstract class ViewMapper {
 		abstract void applyToView(View view);
 	}
@@ -599,7 +599,7 @@ implements GestureDetector.OnGestureListener, ScaleGestureDetector.OnScaleGestur
 
 		mMeasuredWidth = v.getMeasuredWidth();
 		mMeasuredHeight = v.getMeasuredHeight();
-		
+
 		// Work out a scale that will fit it to this view
 		float scale = Math.min((float)getWidth()/(float)v.getMeasuredWidth(),
 				(float)getHeight()/(float)v.getMeasuredHeight());
@@ -714,9 +714,9 @@ implements GestureDetector.OnGestureListener, ScaleGestureDetector.OnScaleGestur
 		}
 
 		Rect selectedRect = null;
-		
+
 		float ratio = v.getWidth() / mSize.x;
-		
+
 		float click_x = viewFocusX / ratio;
 		float click_y = viewFocusY / ratio;
 
@@ -731,7 +731,7 @@ implements GestureDetector.OnGestureListener, ScaleGestureDetector.OnScaleGestur
 				//y: height - rect.Top
 				//width: rect.Right - rect.Left
 				//height: rect.Top - rect.Bottom
-				
+
 				Log.i("ReaderView", "click x: "+click_x+", y: "+click_y);
 
 				int count = pageObjects.length / 4;
@@ -765,58 +765,70 @@ implements GestureDetector.OnGestureListener, ScaleGestureDetector.OnScaleGestur
 
 		if (selectedRect != null) {
 			Log.i("ReaderView", "found rect!");
-			
-			smartZoom = true;
-			
+
 			int width = selectedRect.right - selectedRect.left;
 			Log.i("ReaderView", "width " +width);
-			
+
 			int padding = 20;
-			
+
 			int point_x = selectedRect.left - padding/2;
 			int point_y = (int) click_y;//selectedRect.top;// (int)((float)selectedRect.top + (float)selectedRect.height()/(float)2 * (float)ratio);//fiX THIS!
-			
-			float width_padding = width + padding;
-			
-			mScale = mSize.x / width_padding * this.getWidth() / mMeasuredWidth;
-			
-			viewFocusX = (int)e.getX() - (v.getLeft() + mXScroll);
-			viewFocusY = (int)e.getY() - (v.getTop() + mXScroll);
-			
-			if (v != null) {
-				float ratiox = mMeasuredWidth / mSize.x;
-				
-				int moveX = (int)(point_x *ratiox *mScale);
-				int moveY = (int)(point_y *ratiox *mScale) - (int)mMeasuredHeight/2;
-				mXScroll =-v.getLeft() - moveX;
-				mYScroll =-v.getTop() - moveY;
 
-				requestLayout();
+			float width_padding = width + padding;
+
+			float new_scale = mSize.x / width_padding * this.getWidth() / mMeasuredWidth;
+
+			if (smartZoom && mScale == new_scale && e.getY() > mMeasuredHeight/3 && e.getY() < mMeasuredHeight/3*2) {
+				unzoom(v);
+			}else{
+				mScale = new_scale;
+
+				smartZoom = true;
+
+				if (v != null) {
+					float ratiox = mMeasuredWidth / mSize.x;
+
+					int moveX = (int)(point_x *ratiox *mScale);
+					int moveY = (int)(point_y *ratiox *mScale) - (int)mMeasuredHeight/2;
+					
+					if (moveX < 0) {
+						moveX = 0;
+					}
+					
+					if (moveY < 0) {
+						moveY = 0;
+					}
+					
+					float limitY = mMeasuredHeight * mScale - mMeasuredHeight;
+					
+					if (moveY > limitY) {
+						moveY = (int) (mMeasuredHeight * mScale - mMeasuredHeight) - 30;
+					}
+					
+					mXScroll =-v.getLeft() - moveX;
+					mYScroll =-v.getTop() - moveY;
+
+					requestLayout();
+				}
 			}
 		}else{
-			smartZoom = false;
-			/*;
-
-			Log.i("ReaderView"," "+previousScale+" "+mScale);
-			if(mScale<=1.0f){
-				mScale = 2.5f;
-			}else{
-				mScale = 1.0f;			
-			}*/
-			
-			float previousScale = mScale;
-			mScale = 1.0f;
-
-			float factor = mScale/previousScale;
-
-			if (v != null) {
-				mXScroll = -v.getLeft();//+= viewFocusX - viewFocusX * factor;
-				mYScroll = -v.getTop();// viewFocusY - viewFocusY * factor;
-				requestLayout();
-			}
+			unzoom(v);
 		}
 
 		return true;
+	}
+	
+	private void unzoom(View v) {
+		smartZoom = false;
+
+		float previousScale = mScale;
+		mScale = 1.0f;
+		
+		if (v != null) {
+			mXScroll = -v.getLeft();//+= viewFocusX - viewFocusX * factor;
+			mYScroll = -v.getTop();// viewFocusY - viewFocusY * factor;
+			requestLayout();
+		}
 	}
 
 	@Override
