@@ -75,7 +75,16 @@ implements GestureDetector.OnGestureListener, ScaleGestureDetector.OnScaleGestur
 
 	private Fragment mParent;
 
+	//Smart Zoom variables
 	private boolean smartZoom = false;
+	private boolean smartZoomReposition = false;
+	
+	private enum SmartZoomDirection {
+		NONE,
+		VERTICAL,
+		HORIZONTAL
+	}
+	private SmartZoomDirection smartZoomDirection = SmartZoomDirection.NONE;
 
 	static abstract class ViewMapper {
 		abstract void applyToView(View view);
@@ -111,19 +120,7 @@ implements GestureDetector.OnGestureListener, ScaleGestureDetector.OnScaleGestur
 			requestLayout();
 		}
 	}
-
-	public void moveToNext() {
-		//View v = mChildViews.get(mCurrent+1);
-		//if (v != null)
-		//	slideViewOntoScreen(v);
-	}
-
-	public void moveToPrevious() {
-		//View v = mChildViews.get(mCurrent-1);
-		//if (v != null)
-		//	slideViewOntoScreen(v);
-	}
-
+	
 	// When advancing down the page, we want to advance by about
 	// 90% of a screenful. But we'd be happy to advance by between
 	// 80% and 95% if it means we hit the bottom in a whole number
@@ -273,6 +270,15 @@ implements GestureDetector.OnGestureListener, ScaleGestureDetector.OnScaleGestur
 
 			if(withinBoundsInDirectionOfTravel(bounds, velocityX, velocityY)
 					&& expandedBounds.contains(0, 0)) {
+				
+				setSmartZoomDirection(velocityX, velocityY);
+				
+				if (smartZoomDirection == SmartZoomDirection.HORIZONTAL) {
+					velocityY = 0;
+				}else if (smartZoomDirection == SmartZoomDirection.VERTICAL) {
+					velocityX = 0;
+				}
+				
 				mScroller.fling(0, 0, (int)velocityX, (int)velocityY, bounds.left, bounds.right, bounds.top, bounds.bottom);
 				post(this);
 			}
@@ -284,13 +290,40 @@ implements GestureDetector.OnGestureListener, ScaleGestureDetector.OnScaleGestur
 	@Override
 	public void onLongPress(MotionEvent e) {
 	}
+	
+	public void setSmartZoomDirection(float distanceX, float distanceY) {
+		int diff = 10;
+		
+		if (smartZoomDirection == SmartZoomDirection.NONE) {
+			if(distanceY >= diff || distanceY <= -diff){
+				smartZoomDirection = SmartZoomDirection.VERTICAL;
+				smartZoomReposition = true;
+			}else if (distanceX >= diff || distanceX <= -diff) {
+				smartZoomDirection = SmartZoomDirection.HORIZONTAL;
+				smartZoomReposition = true;
+			}
+		}
+	}
 
 	@Override
 	public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX,
 			float distanceY) {
 		if (!mScrollDisabled) {
-			mXScroll -= distanceX;
-			mYScroll -= distanceY;
+			if (smartZoom) {
+				setSmartZoomDirection(distanceX, distanceY);
+			}
+			
+			if (smartZoomDirection != SmartZoomDirection.NONE) {
+				if (smartZoomDirection == SmartZoomDirection.HORIZONTAL) {
+					mXScroll -= distanceX;
+				}else if(smartZoomDirection == SmartZoomDirection.VERTICAL) {
+					mYScroll -= distanceY;
+				}
+			}else{
+				mXScroll -= distanceX;
+				mYScroll -= distanceY;
+			}
+			
 			requestLayout();
 		}
 		return true;
@@ -375,10 +408,14 @@ implements GestureDetector.OnGestureListener, ScaleGestureDetector.OnScaleGestur
 
 		if ((event.getAction() & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_DOWN) {
 			mUserInteracting = true;
+			Log.i("ReaderView", "ACTION DOWN!");
 		}
 		if ((event.getAction() & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_UP) {
+			Log.i("ReaderView", "ACTION UP");
 			mScrollDisabled = false;
 			mUserInteracting = false;
+			
+			smartZoomDirection = SmartZoomDirection.NONE;
 
 			View v = mChildViews.get(mCurrent);
 			if (v != null) {
@@ -778,12 +815,13 @@ implements GestureDetector.OnGestureListener, ScaleGestureDetector.OnScaleGestur
 
 			float new_scale = mSize.x / width_padding * this.getWidth() / mMeasuredWidth;
 
-			if (smartZoom && mScale == new_scale && e.getY() > mMeasuredHeight/3 && e.getY() < mMeasuredHeight/3*2) {
+			if (smartZoom && !smartZoomReposition && mScale == new_scale && e.getY() > mMeasuredHeight/3 && e.getY() < mMeasuredHeight/3*2) {
 				unzoom(v);
 			}else{
 				mScale = new_scale;
 
 				smartZoom = true;
+				smartZoomReposition = false;
 
 				if (v != null) {
 					float ratiox = mMeasuredWidth / mSize.x;

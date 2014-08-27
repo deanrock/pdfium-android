@@ -96,20 +96,6 @@ public class PDFReaderView extends Fragment {
 		mDocView = new ReaderView(this.getActivity(), onPdfChangeListener, mItems, mSize, this) {
 			private boolean showButtonsDisabled;
 			
-			final int TAP_PAGE_MARGIN = 5;
-
-			@Override
-			public boolean onSingleTapUp(MotionEvent e) {
-				if (e.getX() < super.getWidth()/TAP_PAGE_MARGIN) {
-					super.moveToPrevious();
-				} else if (e.getX() > super.getWidth()*(TAP_PAGE_MARGIN-1)/TAP_PAGE_MARGIN) {
-					super.moveToNext();
-				} else if (!showButtonsDisabled) {
-
-				}
-				return super.onSingleTapUp(e);
-			}
-
 			@Override
 			public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
 				return super.onScroll(e1, e2, distanceX, distanceY);
