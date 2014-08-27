@@ -859,7 +859,6 @@ implements GestureDetector.OnGestureListener, ScaleGestureDetector.OnScaleGestur
 	private void unzoom(View v) {
 		smartZoom = false;
 
-		float previousScale = mScale;
 		mScale = 1.0f;
 		
 		if (v != null) {
