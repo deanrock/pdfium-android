@@ -58,7 +58,7 @@ public class PDFReaderView extends Fragment {
 	    		
 	    		long x = Debug.getNativeHeapAllocatedSize() / 1048576L;
 	    		
-	    		Log.i("memory", "used: "+String.valueOf(used)+", native: "+String.valueOf(x)+", available: "+String.valueOf(availableMegs));
+	    		if (BuildConfig.DEBUG) Log.i("memory", "used: "+String.valueOf(used)+", native: "+String.valueOf(x)+", available: "+String.valueOf(availableMegs));
 	    		//System.gc();
 	        }
 
@@ -162,7 +162,7 @@ public class PDFReaderView extends Fragment {
 	}
 	
 	public void setPageByUser(int page){
-		Log.d(PDFReaderView.class.getSimpleName()," page: "+page);
+		if (BuildConfig.DEBUG) Log.d(PDFReaderView.class.getSimpleName()," page: "+page);
 		mDocView.setDisplayedViewIndex(page);
 
 	}

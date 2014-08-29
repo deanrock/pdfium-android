@@ -86,12 +86,12 @@ public class MySerialExecutor extends SerialExecutor {
 			
 			reader.loadLibrary();
 			isReaderInitialized = true;
-			Log.i("MySerialExecutor", "initializing reader");
+			if (BuildConfig.DEBUG) Log.i("MySerialExecutor", "initializing reader");
 		}
 		
 		RenderRectangleParams params = (RenderRectangleParams)p;
 		
-		Log.i("MySerialExecutor", "called with command "+String.valueOf(params.getCommand()));
+		if (BuildConfig.DEBUG) Log.i("MySerialExecutor", "called with command "+String.valueOf(params.getCommand()));
 
 		if (params.getCommand() == MySerialExecutor.RENDER) {
 
@@ -104,11 +104,11 @@ public class MySerialExecutor extends SerialExecutor {
 			if (!mDocuments.containsKey(params.getFileName())) {
 				mDocument = new PDFDocument();
 
-				Log.i("MySerialExecutor"," opening: "+params.getFileName());
+				if (BuildConfig.DEBUG) Log.i("MySerialExecutor"," opening: "+params.getFileName());
 				boolean result = mDocument.LoadDocument(params.getFileName());
 
 				if (!result) {
-					Log.e("MySerialExecutor", "cannot load "+params.getFileName());
+					if (BuildConfig.DEBUG) Log.e("MySerialExecutor", "cannot load "+params.getFileName());
 					return null;
 				}
 
@@ -116,7 +116,7 @@ public class MySerialExecutor extends SerialExecutor {
 				boolean res = mDocument.LoadPage(0);
 
 				if (!res) {
-					Log.e("MySerialExecutor", "cannot load page 0 from "+params.getFileName());
+					if (BuildConfig.DEBUG) Log.e("MySerialExecutor", "cannot load page 0 from "+params.getFileName());
 					return null;
 				}
 
@@ -130,7 +130,7 @@ public class MySerialExecutor extends SerialExecutor {
 					mPageObjects.put(params.getFileName(), array);
 				}
 				
-				Log.i("MySerialExecutor", "success: "+array.length);
+				if (BuildConfig.DEBUG) Log.i("MySerialExecutor", "success: "+array.length);
 			}
 
 			mDocument = mDocuments.get(params.getFileName());
@@ -142,7 +142,7 @@ public class MySerialExecutor extends SerialExecutor {
 
 			long loadTime = System.currentTimeMillis() - startTime;
 
-			Log.i("MySerialExecutor", "document: [w] "+width+", [h] "+height+", render: sizeX: "+
+			if (BuildConfig.DEBUG) Log.i("MySerialExecutor", "document: [w] "+width+", [h] "+height+", render: sizeX: "+
 					params.getSizeX()+" sizeY:"+params.getSizeY()+", patchX:"+params.getPatchX()+", patchY: "+params.getPatchY()+", patchWidth: "+
 					params.getPatchWidth()+", patchHeight: "+params.getPatchHeight()+", ratio: "+scaleFactor);
 
@@ -152,7 +152,7 @@ public class MySerialExecutor extends SerialExecutor {
 
 			long fullTime = System.currentTimeMillis() - startFullTime;
 
-			Log.i(MySerialExecutor.class.getSimpleName(), "full=" + String.valueOf(fullTime) + 
+			if (BuildConfig.DEBUG) Log.i(MySerialExecutor.class.getSimpleName(), "full=" + String.valueOf(fullTime) + 
 					" (load="+String.valueOf(loadTime)+
 					")");
 
@@ -160,7 +160,7 @@ public class MySerialExecutor extends SerialExecutor {
 				return null;
 			}
 			
-			Log.i("MySerialExecutor", "Ending taskk "+params.getCommand());
+			if (BuildConfig.DEBUG) Log.i("MySerialExecutor", "Ending taskk "+params.getCommand());
 
 			return mBitmap;
 		}else if (params.command == CLOSE) {
@@ -177,21 +177,21 @@ public class MySerialExecutor extends SerialExecutor {
 					}
 				}
 				
-				Log.i("MySerialExecutor", "document closed "+params.getFileName());
+				if (BuildConfig.DEBUG) Log.i("MySerialExecutor", "document closed "+params.getFileName());
 			}else{
-				Log.e("MySerialExecutor", "couldn't find document to close with url "+params.getFileName());
+				if (BuildConfig.DEBUG) Log.e("MySerialExecutor", "couldn't find document to close with url "+params.getFileName());
 			}
 		}else if(params.command == CLOSE_ALL) {
 			closeAllDocuments();
 			
-			Log.i("MySerialExecutor", "closing all documents...");
+			if (BuildConfig.DEBUG) Log.i("MySerialExecutor", "closing all documents...");
 		}else if(params.command == CLOSE_READER) {
 			closeAllDocuments();
 			
 			isReaderInitialized = false;
 			reader.destroyLibrary();
 			
-			Log.i("MySerialExecutor", "closing all documents & reader...");
+			if (BuildConfig.DEBUG) Log.i("MySerialExecutor", "closing all documents & reader...");
 		}
 		
 		return null;

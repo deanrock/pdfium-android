@@ -101,7 +101,7 @@ public class PageView extends ViewGroup {
 		mParentSize =  new Point(mParent.getWidth(), mParent.getHeight());
 		
 		if (mSize == null) {
-			Log.i("PageView", "mSize == null");
+			if (BuildConfig.DEBUG) Log.i("PageView", "mSize == null");
 			mSize = mParentSize;
 		}
 	}
@@ -110,14 +110,14 @@ public class PageView extends ViewGroup {
 			int patchX, int patchY, int patchWidth, int patchHeight) {
 		
 		if (mItem == null) {
-			Log.e("PageView", "mItem is NULL");
+			if (BuildConfig.DEBUG) Log.e("PageView", "mItem is NULL");
 			Bitmap b = Bitmap.createBitmap(10, 10, Config.ARGB_8888);
 			return b;
 		}
 		
 		resetSize();
 		
-		Log.i("PageView", "dP "+mParent.getWidth()+", "+mParent.getHeight());
+		if (BuildConfig.DEBUG) Log.i("PageView", "dP "+mParent.getWidth()+", "+mParent.getHeight());
 		
 		String mRealPath = Environment.getExternalStorageDirectory()+"/"+mItem.getFileName();
 		File f = new File(mRealPath);
@@ -149,7 +149,7 @@ public class PageView extends ViewGroup {
 		}
 		
 		if (b == null) {
-			Log.e("PageView", "Bitmap is NULL!!!!");
+			if (BuildConfig.DEBUG) Log.e("PageView", "Bitmap is NULL!!!!");
 			b = Bitmap.createBitmap(10, 10, Config.ARGB_8888);
 		}else{
 			
@@ -381,7 +381,7 @@ public class PageView extends ViewGroup {
 	}
 
 	public void addHq(boolean update) {
-		Log.d("PageView", "addHq "+update);
+		if (BuildConfig.DEBUG) Log.d("PageView", "addHq "+update);
 		resetSize();
 		Rect viewArea = new Rect(getLeft(),getTop(),getRight(),getBottom());
 		// If the viewArea's size matches the unzoomed size, there is no need for an hq patch
@@ -389,7 +389,7 @@ public class PageView extends ViewGroup {
 			
 			Point patchViewSize = new Point(viewArea.width(), viewArea.height());
 			
-			Log.d("PageView", mItem.getFileName()+" doesnt match "+mParentSize.x+", "+mParentSize.y+ " --- view: "+viewArea.width() +","+viewArea.height());
+			if (BuildConfig.DEBUG) Log.d("PageView", mItem.getFileName()+" doesnt match "+mParentSize.x+", "+mParentSize.y+ " --- view: "+viewArea.width() +","+viewArea.height());
 			
 			Rect patchArea = new Rect(0, 0, mParentSize.x, mParentSize.y);
 
@@ -438,9 +438,9 @@ public class PageView extends ViewGroup {
 
 				@Override
 				protected void onPostExecute(PatchInfo v) {
-					Log.i("PageView", "postExecute");
+					if (BuildConfig.DEBUG)  Log.i("PageView", "postExecute");
 					if (mPatchBmh == v.bmh) {
-						Log.i("PageView", "patch == bmh");
+						if (BuildConfig.DEBUG) Log.i("PageView", "patch == bmh");
 						mPatchViewSize = v.patchViewSize;
 						mPatchArea     = v.patchArea;
 						if (v.bm != null) {
@@ -454,7 +454,7 @@ public class PageView extends ViewGroup {
 						mPatch.layout(mPatchArea.left, mPatchArea.top, mPatchArea.right, mPatchArea.bottom);
 						invalidate();
 					}else{
-						Log.i("PageView", "patch NOT bmp");
+						if (BuildConfig.DEBUG) Log.i("PageView", "patch NOT bmp");
 					}
 				}
 			};
@@ -464,7 +464,7 @@ public class PageView extends ViewGroup {
 	}
 
 	public void update() {
-		Log.i("PageView", "update called");
+		if (BuildConfig.DEBUG) Log.i("PageView", "update called");
 		// Cancel pending render task
 		if (mDrawEntire != null) {
 			mDrawEntire.cancel(true);

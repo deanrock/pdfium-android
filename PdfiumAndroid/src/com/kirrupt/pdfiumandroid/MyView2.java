@@ -1,5 +1,6 @@
 package com.kirrupt.pdfiumandroid;
 
+import com.kirrupt.pdfiumandroid.BuildConfig;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
@@ -82,7 +83,7 @@ public class MyView2 extends ImageView implements OnTouchListener {
 			document.renderRectangleWithScale((int)displayWidth, (int)displayHeight, scale*1.0f, (int)(scale*200), (int)(scale*200), bitmap);
 
 			long renderTime = System.currentTimeMillis() - startTime;
-			Log.d("TIME", "render=" + String.valueOf(renderTime));
+			if (BuildConfig.DEBUG) Log.d("TIME", "render=" + String.valueOf(renderTime));
 			return bitmap;
 		}
 
@@ -119,7 +120,7 @@ public class MyView2 extends ImageView implements OnTouchListener {
 		protected Bitmap doInBackground(Integer... params) {
 			long startTime = System.currentTimeMillis();
 			
-			Log.i("Render","RenderFullPage");
+			if (BuildConfig.DEBUG) Log.i("Render","RenderFullPage");
 			float scaleFactor = 1;
 			
 			int fullPageWidth = document.width() * (int)scaleFactor;
@@ -127,7 +128,7 @@ public class MyView2 extends ImageView implements OnTouchListener {
 			
 			int fullPageHeight = (int)(ratio * document.height());
 			
-			Log.i(MyView1.class.getSimpleName()," render: "+fullPageWidth+" "+fullPageHeight+", ratio: "+ratio);
+			if (BuildConfig.DEBUG) Log.i(MyView1.class.getSimpleName()," render: "+fullPageWidth+" "+fullPageHeight+", ratio: "+ratio);
 			
 			Bitmap bitmap = Bitmap.createBitmap(fullPageWidth, fullPageHeight, Config.ARGB_8888);
 			
@@ -135,7 +136,7 @@ public class MyView2 extends ImageView implements OnTouchListener {
 			
 			long renderTime = System.currentTimeMillis() - startTime;
 			
-			Log.i(MyView1.class.getSimpleName(), "(fullpage) render=" + String.valueOf(renderTime));
+			if (BuildConfig.DEBUG) Log.i(MyView1.class.getSimpleName(), "(fullpage) render=" + String.valueOf(renderTime));
 			
 			return bitmap;
 		}
@@ -242,7 +243,7 @@ public class MyView2 extends ImageView implements OnTouchListener {
 	@Override
 	public boolean onTouch(View v, MotionEvent event){
 		
-		Log.i("touch", "touch");
+		if (BuildConfig.DEBUG) Log.i("touch", "touch");
 		switch (event.getAction() & MotionEvent.ACTION_MASK) {
 		case MotionEvent.ACTION_DOWN:
 			savedMatrix.set(matrix);
@@ -278,7 +279,7 @@ public class MyView2 extends ImageView implements OnTouchListener {
 	public void drag(MotionEvent event){
 		matrix.getValues(matrixValues);
 
-		Log.i("drag","drag");
+		if (BuildConfig.DEBUG) Log.i("drag","drag");
 		float left = matrixValues[2];
 		float top = matrixValues[5];
 		float bottom = (top + (matrixValues[0] * mBitmapHeight)) - mViewHeight;
@@ -348,7 +349,7 @@ public class MyView2 extends ImageView implements OnTouchListener {
 		scale = newDist / oldDist;
 		matrix.postScale(scale, scale, bitmapWidth > mViewWidth ? mMiddlePoint.x : midX, bimtapHeight > mViewHeight ? mMiddlePoint.y : midY); 
 
-		Log.i("zoom","zoom");
+		if (BuildConfig.DEBUG) Log.i("zoom","zoom");
 		this.setImageMatrix(matrix);
 
 

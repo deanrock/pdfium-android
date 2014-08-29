@@ -408,10 +408,10 @@ implements GestureDetector.OnGestureListener, ScaleGestureDetector.OnScaleGestur
 
 		if ((event.getAction() & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_DOWN) {
 			mUserInteracting = true;
-			Log.i("ReaderView", "ACTION DOWN!");
+			if (BuildConfig.DEBUG) Log.i("ReaderView", "ACTION DOWN!");
 		}
 		if ((event.getAction() & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_UP) {
-			Log.i("ReaderView", "ACTION UP");
+			if (BuildConfig.DEBUG) Log.i("ReaderView", "ACTION UP");
 			mScrollDisabled = false;
 			mUserInteracting = false;
 			
@@ -769,11 +769,11 @@ implements GestureDetector.OnGestureListener, ScaleGestureDetector.OnScaleGestur
 				//width: rect.Right - rect.Left
 				//height: rect.Top - rect.Bottom
 
-				Log.i("ReaderView", "click x: "+click_x+", y: "+click_y);
+				if (BuildConfig.DEBUG) Log.i("ReaderView", "click x: "+click_x+", y: "+click_y);
 
 				int count = pageObjects.length / 4;
 
-				Log.i("ReaderView", "pageObjects "+pageObjects.length);
+				if (BuildConfig.DEBUG) Log.i("ReaderView", "pageObjects "+pageObjects.length);
 
 				if (pageObjects.length % 4 == 0) {
 					for(int i = 0; i < count*4; i+=4) {
@@ -792,19 +792,19 @@ implements GestureDetector.OnGestureListener, ScaleGestureDetector.OnScaleGestur
 					}
 
 				}else{
-					Log.e("ReaderView", "pageObjects.length % 4 > 0!");
+					if (BuildConfig.DEBUG) Log.e("ReaderView", "pageObjects.length % 4 > 0!");
 				}
 			}
 
 		}else{
-			Log.d("ReaderView", "mCurrent > size() or mItems==null, mCurrent "+mCurrent);
+			if (BuildConfig.DEBUG) Log.d("ReaderView", "mCurrent > size() or mItems==null, mCurrent "+mCurrent);
 		}
 
 		if (selectedRect != null) {
-			Log.i("ReaderView", "found rect!");
+			if (BuildConfig.DEBUG) Log.i("ReaderView", "found rect!");
 
 			int width = selectedRect.right - selectedRect.left;
-			Log.i("ReaderView", "width " +width);
+			if (BuildConfig.DEBUG) Log.i("ReaderView", "width " +width);
 
 			int padding = 20;
 

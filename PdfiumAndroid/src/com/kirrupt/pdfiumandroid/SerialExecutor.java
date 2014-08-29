@@ -72,7 +72,7 @@ public abstract class SerialExecutor {
 
 		@Override
 		public void run() {
-			Log.d("SerialExecutor", "OnPostExecute");
+			if (BuildConfig.DEBUG) Log.d("SerialExecutor", "OnPostExecute");
 		}
 	}
 }
