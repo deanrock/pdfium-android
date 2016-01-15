@@ -21,7 +21,10 @@ PdfiumAndroid/obj/*
 PdfiumAndroid/libs/armeabi/
 PdfiumAndroid/libs/x86/
 PdfiumAndroid/libs/armeabi-v7a/
+PdfiumAndroid/libs/arm64-v8a/
+PdfiumAndroid/libs/x86_64/
 PdfiumAndroid/bin/
 
 PdfiumAndroid/gen/
 
+!ti/Application.mk
